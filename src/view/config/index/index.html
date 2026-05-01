@@ -1,0 +1,93 @@
+{extend name="main"}
+
+{block name="content"}
+<form action="{:url('index')}" class="layui-form" data-auto="true" method="post">
+    <div class="layui-card-body">
+
+        <fieldset class="layui-bg-gray">
+            <legend><b class="layui-badge think-bg-violet">{:lang('AI模型配置')}</b></legend>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>{:lang('启用AI分析')}</b>Enabled</span>
+                <select name="enabled" class="layui-select">
+                    <option value="1" {if !empty($ai.enabled)}selected{/if}>{:lang('启用')}</option>
+                    <option value="0" {if empty($ai.enabled)}selected{/if}>{:lang('关闭')}</option>
+                </select>
+                <span class="help-block">{:lang('启用后，后续可在账号权重分析里调用大模型生成中文建议。')}</span>
+            </div>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>{:lang('模型供应商')}</b>Provider</span>
+                <select name="provider" class="layui-select" lay-filter="provider">
+                    {foreach $providers as $code => $provider}
+                    <option value="{$code}" {if $ai.provider eq $code}selected{/if}>{$provider.label}</option>
+                    {/foreach}
+                </select>
+                <span class="help-block" id="ProviderNote">{$ai.note|default=''}</span>
+            </div>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>API Key</b>ApiKey</span>
+                <input name="api_key" type="password" autocomplete="new-password" class="layui-input"
+                    placeholder="{if !empty($ai.api_key_mask)}{:lang('已配置：')}{$ai.api_key_mask}{else}{:lang('请输入模型平台 API Key')}{/if}">
+                <span class="help-block">{:lang('留空不会覆盖原有密钥；如需更换，请输入新的 API Key 后保存。')}</span>
+            </div>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>Base URL</b>BaseUrl</span>
+                <input name="base_url" class="layui-input" value="{$ai.base_url|default=''}"
+                    placeholder="{:lang('例如：https://dashscope.aliyuncs.com/compatible-mode/v1')}">
+                <span class="help-block">{:lang('选择供应商时会自动填入预设地址；部分平台需要按控制台实际地址填写。')}</span>
+            </div>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>{:lang('模型名称')}</b>Model</span>
+                <input name="model" class="layui-input" value="{$ai.model|default=''}"
+                    placeholder="{:lang('例如：qwen-plus、deepseek-chat、glm-4-plus')}">
+                <span class="help-block">{:lang('火山方舟等平台可能需要填写接入点 ID，请以平台控制台为准。')}</span>
+            </div>
+
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-xs6">
+                    <div class="layui-form-item">
+                        <span class="help-label"><b>Temperature</b>随机性</span>
+                        <input name="temperature" type="number" min="0" max="2" step="0.1" class="layui-input" value="{$ai.temperature|default='0.3'}">
+                    </div>
+                </div>
+                <div class="layui-col-xs6">
+                    <div class="layui-form-item">
+                        <span class="help-label"><b>Max Tokens</b>最大输出</span>
+                        <input name="max_tokens" type="number" min="1" max="128000" class="layui-input" value="{$ai.max_tokens|default='1200'}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <span class="help-label"><b>{:lang('系统提示词')}</b>SystemPrompt</span>
+                <textarea name="system_prompt" class="layui-textarea" style="min-height:120px"
+                    placeholder="{:lang('用于约束 AI 输出风格和分析重点')}">{$ai.system_prompt|default=''}</textarea>
+            </div>
+        </fieldset>
+
+    </div>
+
+    <div class="hr-line-dashed"></div>
+    <div class="layui-form-item text-center">
+        <button class="layui-btn" type="submit">{:lang('保存配置')}</button>
+    </div>
+</form>
+
+<label class="layui-hide"><textarea id="AiProvidersData">{:json_encode($providers, JSON_UNESCAPED_UNICODE)}</textarea></label>
+
+<script>
+    $(function () {
+        var providers = JSON.parse($('#AiProvidersData').text() || '{}');
+        layui.form.on('select(provider)', function (data) {
+            var provider = providers[data.value] || {};
+            if (provider.base_url) $('[name=base_url]').val(provider.base_url);
+            if (provider.model) $('[name=model]').val(provider.model);
+            $('#ProviderNote').text(provider.note || '');
+        });
+    });
+</script>
+{/block}

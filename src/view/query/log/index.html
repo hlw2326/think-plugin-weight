@@ -1,0 +1,108 @@
+{extend name="table"}
+
+{block name="button"}
+<!--{if auth("query")}-->
+<a data-modal='{:url("query")}' data-title="{:lang('发起查询')}" class='layui-btn layui-btn-sm layui-btn-normal'>{:lang('发起查询')}</a>
+<!--{/if}-->
+<!--{if auth("clear")}-->
+<a data-action='{:url("clear")}' data-confirm="{:lang('确定要清理30天前的查询记录吗？')}" data-callback="reload" data-table-id="WeightQueryLogTable" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('清理日志')}</a>
+<!--{/if}-->
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='query/log/index_search'}
+    <table id="WeightQueryLogTable" data-url="{:sysuri('index')}" data-target-search="form.form-search"></table>
+</div>
+
+<label class="layui-hide"><textarea id="PlatformsData">{:json_encode($platforms, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="ChannelsData">{:json_encode($channels, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="GradesData">{:json_encode($grades, JSON_UNESCAPED_UNICODE)}</textarea></label>
+
+<script type="text/html" id="PlatformTpl">
+    {{- $.enumLabel('platforms', d.platform) }}
+</script>
+
+<script type="text/html" id="ChannelTpl">
+    {{- $.enumLabel('channels', d.channel) }}
+</script>
+
+<script type="text/html" id="GradeTpl">
+    {{# if(d.status > 0){ }}
+    {{- $.enumLabel('grades', d.weight_grade) }}
+    {{# } else { }}
+    <span class="color-desc">-</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="ScoreTpl">
+    {{# if(d.status > 0){ }}
+    <b class="color-blue">{{d.weight_score}}</b>
+    {{# } else { }}
+    <span class="color-desc">-</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="StatusTpl">
+    {{- d.status > 0 ? '<span class="layui-badge layui-bg-green">{:lang("成功")}</span>' : '<span class="layui-badge layui-bg-red">{:lang("失败")}</span>' }}
+</script>
+
+<script type="text/html" id="InputTpl">
+    <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;" title="{{d.input}}">{{d.input || '-'}}</div>
+</script>
+
+<script type="text/html" id="AccountTpl">
+    {{# if(d.nickname){ }}
+    <div><b>{{d.nickname}}</b></div>
+    <div class="color-desc font-s12">{{d.display_id || d.account_id || '-'}}</div>
+    {{# } else { }}
+    <span class="color-desc">-</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="MetricTpl">
+    <div class="font-s12">粉丝 {{d.fan_count || 0}}</div>
+    <div class="font-s12 color-desc">作品 {{d.work_count || 0}} / 获赞 {{d.like_count || 0}} / 收藏 {{d.collect_count || 0}}</div>
+</script>
+
+<script type="text/html" id="toolbar">
+    <!--{if auth("detail")}-->
+    <a class="layui-btn layui-btn-sm" data-modal='{:url("detail")}?id={{d.id}}' data-title="{:lang('查询详情')}">{:lang('查 看')}</a>
+    <!--{/if}-->
+</script>
+
+<script>
+    $.weightEnums = {
+        platforms: JSON.parse($('#PlatformsData').text()),
+        channels: JSON.parse($('#ChannelsData').text()),
+        grades: JSON.parse($('#GradesData').text())
+    };
+
+    $.enumLabel = function (type, key) {
+        var item = ($.weightEnums[type] || {})[key];
+        if (!item) return key || '-';
+        return '<span class="layui-badge ' + item.class + '">' + item.label + '</span>';
+    };
+
+    $(function () {
+        $('#WeightQueryLogTable').layTable({
+            even: true, height: 'full',
+            sort: {field: 'id', type: 'desc'},
+            cols: [[
+                {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                {field: 'platform', title: '{:lang("平台")}', width: 100, align: 'center', templet: '#PlatformTpl'},
+                {field: 'channel', title: '{:lang("渠道")}', width: 90, align: 'center', templet: '#ChannelTpl'},
+                {field: 'input', title: '{:lang("查询内容")}', minWidth: 220, templet: '#InputTpl'},
+                {field: 'nickname', title: '{:lang("账号")}', minWidth: 160, templet: '#AccountTpl'},
+                {field: 'fan_count', title: '{:lang("数据")}', width: 150, templet: '#MetricTpl'},
+                {field: 'weight_score', title: '{:lang("分数")}', width: 80, align: 'center', templet: '#ScoreTpl', sort: true},
+                {field: 'weight_grade', title: '{:lang("等级")}', width: 80, align: 'center', templet: '#GradeTpl'},
+                {field: 'status', title: '{:lang("状态")}', width: 80, align: 'center', templet: '#StatusTpl'},
+                {field: 'exec_time', title: '{:lang("耗时")}', width: 100, align: 'center', templet: '<span>{{d.exec_time || 0}} ms</span>'},
+                {field: 'create_at', title: '{:lang("查询时间")}', width: 170, align: 'center', sort: true},
+                {toolbar: '#toolbar', title: '{:lang("操作面板")}', width: 100, align: 'center', fixed: 'right'}
+            ]]
+        });
+    });
+</script>
+{/block}

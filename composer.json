@@ -1,0 +1,48 @@
+{
+  "type": "think-admin-plugin",
+  "name": "hlw2326/think-plugin-weight",
+  "version": "1.0.0",
+  "homepage": "https://www.hlw2326.com",
+  "description": "账号权重查询与记录插件",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "hlw2326",
+      "email": "1608626143@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "hlw2326/platform-data-sdk": "dev-main",
+    "openai-php/client": "^0.10.1",
+    "guzzlehttp/guzzle": "^7.10"
+  },
+  "autoload": {
+    "files": [
+      "./src/helper.php"
+    ],
+    "psr-4": {
+      "plugin\\weight\\": "src"
+    }
+  },
+  "extra": {
+    "think": {
+      "services": [
+        "plugin\\weight\\Service"
+      ]
+    },
+    "plugin": {
+      "copy": {
+        "stc/database": "database/migrations"
+      }
+    },
+    "config": {
+      "type": "module",
+      "name": "账号权重",
+      "document": "https://www.hlw2326.com",
+      "description": "账号权重查询与记录插件",
+      "license": []
+    }
+  }
+}

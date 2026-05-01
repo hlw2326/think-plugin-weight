@@ -1,0 +1,141 @@
+<form class="layui-form layui-card" autocomplete="off" style="padding:20px">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('平台')}</label>
+            <div class="layui-form-mid" id="DetailPlatform"></div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('渠道')}</label>
+            <div class="layui-form-mid" id="DetailChannel"></div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('状态')}</label>
+            <div class="layui-form-mid" id="DetailStatus"></div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('耗时')}</label>
+            <div class="layui-form-mid">{$vo.exec_time|default='0'} ms</div>
+        </div>
+
+        <div class="layui-col-xs12">
+            <label class="layui-form-label block">{:lang('查询内容')}</label>
+            <div class="layui-form-mid" style="word-break:break-all">{$vo.input|default='-'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('昵称')}</label>
+            <div class="layui-form-mid">{$vo.nickname|default='-'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('账号ID')}</label>
+            <div class="layui-form-mid">{$vo.display_id|default=''} {$vo.account_id|default=''}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('等级')}</label>
+            <div class="layui-form-mid" id="DetailGrade"></div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('权重分')}</label>
+            <div class="layui-form-mid"><b class="color-blue">{$vo.weight_score|default='0'}</b></div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('粉丝数')}</label>
+            <div class="layui-form-mid">{$vo.fan_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('关注数')}</label>
+            <div class="layui-form-mid">{$vo.follow_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('作品数')}</label>
+            <div class="layui-form-mid">{$vo.work_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('获赞数')}</label>
+            <div class="layui-form-mid">{$vo.like_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs3">
+            <label class="layui-form-label block">{:lang('收藏数')}</label>
+            <div class="layui-form-mid">{$vo.collect_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('采样作品')}</label>
+            <div class="layui-form-mid">{$vo.sample_feed_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('平均点赞')}</label>
+            <div class="layui-form-mid">{$vo.avg_like_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('平均评论/分享')}</label>
+            <div class="layui-form-mid">{$vo.avg_comment_count|default='0'} / {$vo.avg_share_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('平均收藏/播放')}</label>
+            <div class="layui-form-mid">{$vo.avg_collect_count|default='0'} / {$vo.avg_play_count|default='0'}</div>
+        </div>
+
+        <div class="layui-col-xs4">
+            <label class="layui-form-label block">{:lang('互动率')}</label>
+            <div class="layui-form-mid">{$vo.interaction_rate|default='0'}%</div>
+        </div>
+
+        <div class="layui-col-xs12">
+            <label class="layui-form-label block">{:lang('分析摘要')}</label>
+            <div class="layui-form-mid" style="word-break:break-all">{$vo.analysis_summary|default='-'}</div>
+        </div>
+
+        <div class="layui-col-xs12">
+            <label class="layui-form-label block">{:lang('失败原因')}</label>
+            <div class="layui-form-mid color-red" style="word-break:break-all">{$vo.fail_reason|default=''}</div>
+        </div>
+
+        <div class="layui-col-xs12">
+            <label class="layui-form-label block">{:lang('原始结果')}</label>
+            <textarea readonly class="layui-textarea" style="min-height:300px;font-size:12px">{$raw_result|default=''}</textarea>
+        </div>
+    </div>
+</form>
+
+<label class="layui-hide"><textarea id="PlatformsData">{:json_encode($platforms, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="ChannelsData">{:json_encode($channels, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="StatusesData">{:json_encode($statuses, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="GradesData">{:json_encode($grades, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="VoData">{:json_encode($vo, JSON_UNESCAPED_UNICODE)}</textarea></label>
+
+<script>
+    $(function () {
+        var vo = JSON.parse($('#VoData').text());
+        var enums = {
+            platforms: JSON.parse($('#PlatformsData').text()),
+            channels: JSON.parse($('#ChannelsData').text()),
+            statuses: JSON.parse($('#StatusesData').text()),
+            grades: JSON.parse($('#GradesData').text())
+        };
+        var label = function (type, key) {
+            var item = (enums[type] || {})[key];
+            if (!item) return key || '-';
+            return '<span class="layui-badge ' + item.class + '">' + item.label + '</span>';
+        };
+
+        $('#DetailPlatform').html(label('platforms', vo.platform));
+        $('#DetailChannel').html(label('channels', vo.channel));
+        $('#DetailStatus').html(label('statuses', String(vo.status)));
+        $('#DetailGrade').html(vo.status > 0 ? label('grades', vo.weight_grade) : '-');
+    });
+</script>
