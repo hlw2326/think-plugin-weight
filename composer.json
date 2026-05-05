@@ -34,7 +34,8 @@
     },
     "plugin": {
       "copy": {
-        "stc/database": "database/migrations"
+        "stc/database": "database/migrations",
+        "stc/assets/json-viewer": "public/static/plugs/qz-json-viewer"
       }
     },
     "config": {

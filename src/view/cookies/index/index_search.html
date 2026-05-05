@@ -1,11 +1,11 @@
-<form class="layui-form layui-form-pane form-search" action="{:sysuri()}" onsubmit="return false" method="get" autocomplete="off">
+<form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
     <fieldset>
         <legend>{:lang('条件搜索')}</legend>
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">{:lang('关键词')}</label>
+            <label class="layui-form-label">{:lang('配置名称')}</label>
             <div class="layui-input-inline">
-                <input name="input" value="{$get.input|default=''}" placeholder="{:lang('链接/昵称/账号/用户UID/IP')}" class="layui-input">
+                <input name="name" value="{$get.name|default=''}" placeholder="{:lang('按名称或备注搜索')}" class="layui-input">
             </div>
         </div>
 
@@ -34,37 +34,36 @@
         </div>
 
         <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">{:lang('默认')}</label>
+            <div class="layui-input-inline">
+                <select name="is_default" class="layui-select" lay-append-to>
+                    <option value="">-- {:lang('全部')} --</option>
+                    <option value="1" {if isset($get.is_default) && $get.is_default == '1'}selected{/if}>{:lang('默认')}</option>
+                    <option value="0" {if isset($get.is_default) && $get.is_default == '0'}selected{/if}>{:lang('普通')}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
             <label class="layui-form-label">{:lang('状态')}</label>
             <div class="layui-input-inline">
                 <select name="status" class="layui-select" lay-append-to>
                     <option value="">-- {:lang('全部')} --</option>
-                    <option value="1" {if isset($get.status) && $get.status === '1'}selected{/if}>{:lang('成功')}</option>
-                    <option value="0" {if isset($get.status) && $get.status === '0'}selected{/if}>{:lang('失败')}</option>
+                    <option value="1" {if isset($get.status) && $get.status == '1'}selected{/if}>{:lang('启用')}</option>
+                    <option value="0" {if isset($get.status) && $get.status == '0'}selected{/if}>{:lang('禁用')}</option>
                 </select>
             </div>
         </div>
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">{:lang('等级')}</label>
-            <div class="layui-input-inline">
-                <select name="weight_grade" class="layui-select" lay-append-to>
-                    <option value="">-- {:lang('全部')} --</option>
-                    {foreach $grades as $k => $v}
-                    <option value="{$k}" {if isset($get.weight_grade) && $get.weight_grade == $k}selected{/if}>{$v.label}</option>
-                    {/foreach}
-                </select>
-            </div>
-        </div>
-
-        <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">{:lang('查询时间')}</label>
+            <label class="layui-form-label">{:lang('创建时间')}</label>
             <div class="layui-input-inline">
                 <input data-date-range name="create_at" value="{$get.create_at|default=''}" placeholder="{:lang('请选择时间范围')}" class="layui-input">
             </div>
         </div>
 
         <div class="layui-form-item layui-inline">
-            <button class="layui-btn layui-btn-primary"><i class="layui-icon layui-icon-search"></i> {:lang('搜 索')}</button>
+            <button class="layui-btn layui-btn-primary"><i class="layui-icon layui-icon-search"></i>{:lang('搜 索')}</button>
         </div>
     </fieldset>
 </form>

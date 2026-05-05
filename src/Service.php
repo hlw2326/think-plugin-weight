@@ -33,13 +33,18 @@ class Service extends Plugin
      */
     public static function menu(): array
     {
-        $code = app(static::class)->appCode;
+        $code = (string) app(static::class)->appCode;
 
         return [
             [
-                'name' => 'AI模型配置',
+                'name' => '插件配置',
                 'icon' => 'layui-icon layui-icon-set',
                 'node' => "{$code}/config.index/index",
+            ],
+            [
+                'name' => 'Cookie配置池',
+                'icon' => 'layui-icon layui-icon-template-1',
+                'node' => "{$code}/cookies.index/index",
             ],
             [
                 'name' => '查询记录',

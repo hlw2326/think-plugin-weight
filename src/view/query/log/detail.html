@@ -1,125 +1,190 @@
-<form class="layui-form layui-card" autocomplete="off" style="padding:20px">
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('平台')}</label>
-            <div class="layui-form-mid" id="DetailPlatform"></div>
-        </div>
+<style>
+    .weight-detail-wrap {
+        padding: 16px 20px 20px;
+    }
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('渠道')}</label>
-            <div class="layui-form-mid" id="DetailChannel"></div>
-        </div>
+    .weight-detail-table th {
+        width: 140px;
+        text-align: right;
+        color: #666;
+        background: #fafafa;
+        font-weight: 400;
+    }
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('状态')}</label>
-            <div class="layui-form-mid" id="DetailStatus"></div>
-        </div>
+    .weight-detail-table td {
+        min-width: 150px;
+        word-break: break-all;
+    }
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('耗时')}</label>
-            <div class="layui-form-mid">{$vo.exec_time|default='0'} ms</div>
-        </div>
+    .weight-detail-table .weight-score {
+        color: #1e9fff;
+        font-weight: 700;
+    }
 
-        <div class="layui-col-xs12">
-            <label class="layui-form-label block">{:lang('查询内容')}</label>
-            <div class="layui-form-mid" style="word-break:break-all">{$vo.input|default='-'}</div>
-        </div>
+    .weight-detail-table .raw-json-view {
+        min-height: 320px;
+        max-height: 520px;
+        overflow: auto;
+        padding: 12px 14px;
+        border: 1px solid #e6e6e6;
+        border-radius: 4px;
+        background: #fbfbfb;
+        color: #333;
+        font-family: Consolas, Monaco, Menlo, monospace;
+        font-size: 12px;
+        line-height: 1.65;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
 
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('昵称')}</label>
-            <div class="layui-form-mid">{$vo.nickname|default='-'}</div>
-        </div>
+    .weight-detail-table .raw-json-view .json-document {
+        margin: 0;
+        padding: 0;
+    }
 
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('账号ID')}</label>
-            <div class="layui-form-mid">{$vo.display_id|default=''} {$vo.account_id|default=''}</div>
-        </div>
+    .weight-detail-table .raw-json-view ul.json-dict,
+    .weight-detail-table .raw-json-view ol.json-array,
+    .weight-detail-table .raw-json-view .json-placeholder {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
 
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('等级')}</label>
-            <div class="layui-form-mid" id="DetailGrade"></div>
-        </div>
+    .weight-detail-table .raw-json-view a.json-toggle,
+    .weight-detail-table .raw-json-view a.json-placeholder {
+        cursor: pointer;
+    }
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('权重分')}</label>
-            <div class="layui-form-mid"><b class="color-blue">{$vo.weight_score|default='0'}</b></div>
-        </div>
+    .weight-detail-table .json-error {
+        margin-bottom: 8px;
+        color: #ff5722;
+    }
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('粉丝数')}</label>
-            <div class="layui-form-mid">{$vo.fan_count|default='0'}</div>
-        </div>
+    .weight-detail-table .json-plain {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+</style>
 
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('关注数')}</label>
-            <div class="layui-form-mid">{$vo.follow_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('作品数')}</label>
-            <div class="layui-form-mid">{$vo.work_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('获赞数')}</label>
-            <div class="layui-form-mid">{$vo.like_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs3">
-            <label class="layui-form-label block">{:lang('收藏数')}</label>
-            <div class="layui-form-mid">{$vo.collect_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('采样作品')}</label>
-            <div class="layui-form-mid">{$vo.sample_feed_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('平均点赞')}</label>
-            <div class="layui-form-mid">{$vo.avg_like_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('平均评论/分享')}</label>
-            <div class="layui-form-mid">{$vo.avg_comment_count|default='0'} / {$vo.avg_share_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('平均收藏/播放')}</label>
-            <div class="layui-form-mid">{$vo.avg_collect_count|default='0'} / {$vo.avg_play_count|default='0'}</div>
-        </div>
-
-        <div class="layui-col-xs4">
-            <label class="layui-form-label block">{:lang('互动率')}</label>
-            <div class="layui-form-mid">{$vo.interaction_rate|default='0'}%</div>
-        </div>
-
-        <div class="layui-col-xs12">
-            <label class="layui-form-label block">{:lang('分析摘要')}</label>
-            <div class="layui-form-mid" style="word-break:break-all">{$vo.analysis_summary|default='-'}</div>
-        </div>
-
-        <div class="layui-col-xs12">
-            <label class="layui-form-label block">{:lang('失败原因')}</label>
-            <div class="layui-form-mid color-red" style="word-break:break-all">{$vo.fail_reason|default=''}</div>
-        </div>
-
-        <div class="layui-col-xs12">
-            <label class="layui-form-label block">{:lang('原始结果')}</label>
-            <textarea readonly class="layui-textarea" style="min-height:300px;font-size:12px">{$raw_result|default=''}</textarea>
-        </div>
-    </div>
-</form>
+<div class="weight-detail-wrap">
+    <table class="layui-table weight-detail-table">
+        <tbody>
+        <tr>
+            <th>{:lang('平台')}</th>
+            <td id="DetailPlatform"></td>
+            <th>{:lang('渠道')}</th>
+            <td id="DetailChannel"></td>
+        </tr>
+        <tr>
+            <th>Cookie配置</th>
+            <td>{$vo.cookies_name|default='自动'}</td>
+            <th>用户UID</th>
+            <td>{$vo.user_uid|default=''}</td>
+        </tr>
+        <tr>
+            <th>{:lang('状态')}</th>
+            <td id="DetailStatus"></td>
+            <th>{:lang('耗时')}</th>
+            <td>{$vo.exec_time|default='0'} ms</td>
+        </tr>
+        <tr>
+            <th>{:lang('等级')}</th>
+            <td id="DetailGrade"></td>
+            <th>{:lang('查询时间')}</th>
+            <td>{$vo.create_at|default='-'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('查询内容')}</th>
+            <td colspan="3">{$vo.input|default='-'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('昵称')}</th>
+            <td>{$vo.nickname|default='-'}</td>
+            <th>{:lang('账号ID')}</th>
+            <td>{$vo.display_id|default=''} {$vo.account_id|default=''}</td>
+        </tr>
+        <tr>
+            <th>{:lang('权重分')}</th>
+            <td><span class="weight-score">{$vo.weight_score|default='0'}</span></td>
+            <th>{:lang('互动率')}</th>
+            <td>{$vo.interaction_rate|default='0'}%</td>
+        </tr>
+        <tr>
+            <th>{:lang('粉丝数')}</th>
+            <td>{$vo.fan_count|default='0'}</td>
+            <th>{:lang('关注数')}</th>
+            <td>{$vo.follow_count|default='0'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('作品数')}</th>
+            <td>{$vo.work_count|default='0'}</td>
+            <th>{:lang('获赞数')}</th>
+            <td>{$vo.like_count|default='0'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('收藏数')}</th>
+            <td>{$vo.collect_count|default='0'}</td>
+            <th>{:lang('采样作品')}</th>
+            <td>{$vo.sample_feed_count|default='0'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('平均点赞')}</th>
+            <td>{$vo.avg_like_count|default='0'}</td>
+            <th>{:lang('平均评论')}</th>
+            <td>{$vo.avg_comment_count|default='0'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('平均分享')}</th>
+            <td>{$vo.avg_share_count|default='0'}</td>
+            <th>{:lang('平均收藏')}</th>
+            <td>{$vo.avg_collect_count|default='0'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('平均播放')}</th>
+            <td>{$vo.avg_play_count|default='0'}</td>
+            <th></th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>{:lang('分析摘要')}</th>
+            <td colspan="3">{$vo.analysis_summary|default='-'}</td>
+        </tr>
+        <tr>
+            <th>{:lang('失败原因')}</th>
+            <td colspan="3" class="color-red">{$vo.fail_reason|default=''}</td>
+        </tr>
+        <tr>
+            <th>{:lang('原始结果')}</th>
+            <td colspan="3">
+                <div id="RawJsonView" class="raw-json-view"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
 <label class="layui-hide"><textarea id="PlatformsData">{:json_encode($platforms, JSON_UNESCAPED_UNICODE)}</textarea></label>
 <label class="layui-hide"><textarea id="ChannelsData">{:json_encode($channels, JSON_UNESCAPED_UNICODE)}</textarea></label>
 <label class="layui-hide"><textarea id="StatusesData">{:json_encode($statuses, JSON_UNESCAPED_UNICODE)}</textarea></label>
 <label class="layui-hide"><textarea id="GradesData">{:json_encode($grades, JSON_UNESCAPED_UNICODE)}</textarea></label>
 <label class="layui-hide"><textarea id="VoData">{:json_encode($vo, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="RawJsonData">{$raw_result|default=''}</textarea></label>
 
 <script>
     $(function () {
+        require.config({
+            paths: {
+                jsonviewer: 'plugs/qz-json-viewer/jquery.json-viewer'
+            },
+            shim: {
+                jsonviewer: {
+                    deps: ['jquery', 'css!' + baseRoot + 'plugs/qz-json-viewer/jquery.json-viewer.css']
+                }
+            }
+        });
+
         var vo = JSON.parse($('#VoData').text());
         var enums = {
             platforms: JSON.parse($('#PlatformsData').text()),
@@ -132,10 +197,47 @@
             if (!item) return key || '-';
             return '<span class="layui-badge ' + item.class + '">' + item.label + '</span>';
         };
+        var encodeJsonText = function (text) {
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
+        var collapseToggle = function ($toggle) {
+            var $target = $toggle.addClass('collapsed').siblings('ul.json-dict, ol.json-array');
+            var count = $target.children('li').length;
+            $target.hide().siblings('.json-placeholder').remove();
+            $target.after('<a href class="json-placeholder">' + count + (count > 1 ? ' items' : ' item') + '</a>');
+        };
+        var collapseFirstLayer = function ($view) {
+            $view.children('ul.json-dict, ol.json-array').first()
+                .children('li').children('a.json-toggle').each(function () {
+                collapseToggle($(this));
+            });
+        };
+        var renderRawJson = function () {
+            var raw = $('#RawJsonData').val() || $('#RawJsonData').text() || '';
+            var $view = $('#RawJsonView');
+            if (!$.trim(raw)) {
+                $view.html('<span class="json-empty">暂无原始结果</span>');
+                return;
+            }
+            try {
+                $view.jsonViewer(JSON.parse(raw), {
+                    collapsed: false,
+                    rootCollapsable: true,
+                    withQuotes: true,
+                    withLinks: true
+                });
+                collapseFirstLayer($view);
+            } catch (e) {
+                $view.html('<div class="json-error">原始结果不是标准 JSON，已按文本显示</div><pre class="json-plain">' + encodeJsonText(raw) + '</pre>');
+            }
+        };
 
         $('#DetailPlatform').html(label('platforms', vo.platform));
         $('#DetailChannel').html(label('channels', vo.channel));
         $('#DetailStatus').html(label('statuses', String(vo.status)));
         $('#DetailGrade').html(vo.status > 0 ? label('grades', vo.weight_grade) : '-');
+        require(['jsonviewer'], function () {
+            renderRawJson();
+        });
     });
 </script>

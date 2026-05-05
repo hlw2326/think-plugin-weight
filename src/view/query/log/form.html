@@ -2,25 +2,27 @@
     <div class="layui-card-body padding-left-40">
 
         <div class="layui-row layui-col-space15">
-            <div class="layui-col-xs6">
+            <div class="layui-col-xs12">
                 <label class="layui-form-item relative block label-required-prev">
-                    <span class="help-label"><b>{:lang('平台')}</b>平台标识</span>
-                    <select name="platform" class="layui-select" lay-filter="platform" required>
-                        {foreach $platforms as $k => $v}
-                        <option value="{$k}" {if $k eq 'dy'}selected{/if}>{$v.label}</option>
+                    <span class="help-label"><b>Cookie配置</b>选择请求身份</span>
+                    <select name="cookies_id" class="layui-select" required>
+                        <option value="">{:lang('请选择 Cookie 配置')}</option>
+                        {foreach $cookieConfigs as $v}
+                        <option value="{$v.id}">
+                            [{$v.platform_label}/{$v.channel_label}] {$v.name}{if $v.is_default}（默认）{/if}
+                        </option>
                         {/foreach}
                     </select>
                 </label>
             </div>
+        </div>
 
-            <div class="layui-col-xs6">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12">
                 <label class="layui-form-item relative block">
-                    <span class="help-label"><b>{:lang('渠道')}</b>查询渠道</span>
-                    <select name="channel" class="layui-select">
-                        {foreach $channels as $k => $v}
-                        <option value="{$k}" {if $k eq 'auto'}selected{/if}>{$v.label}</option>
-                        {/foreach}
-                    </select>
+                    <span class="help-label"><b>用户UID</b>外部用户标识</span>
+                    <input name="user_uid" maxlength="120" class="layui-input"
+                        placeholder="{:lang('可选，未传则为空')}">
                 </label>
             </div>
         </div>
@@ -36,41 +38,16 @@
         </div>
 
         <div class="layui-row layui-col-space15">
-            <div class="layui-col-xs12">
-                <label class="layui-form-item relative block">
-                    <span class="help-label"><b>Cookie</b>Cookie</span>
-                    <textarea name="cookies" class="layui-textarea" style="min-height:80px"
-                        placeholder="{:lang('可选，仅本次查询使用，不会保存到查询记录')}"></textarea>
-                </label>
-            </div>
-        </div>
-
-        <div class="layui-row layui-col-space15">
-            <div class="layui-col-xs4">
-                <label class="layui-form-item relative block">
-                    <span class="help-label"><b>DID</b>快手 DID</span>
-                    <input name="did" class="layui-input" placeholder="{:lang('快手可选，留空从 Cookie 读取')}">
-                </label>
-            </div>
-            <div class="layui-col-xs4">
+            <div class="layui-col-xs6">
                 <label class="layui-form-item relative block">
                     <span class="help-label"><b>{:lang('超时')}</b>请求超时</span>
                     <input name="timeout" type="number" min="1000" value="10000" class="layui-input">
                 </label>
             </div>
-            <div class="layui-col-xs4">
+            <div class="layui-col-xs6">
                 <label class="layui-form-item relative block">
                     <span class="help-label"><b>{:lang('采样数')}</b>作品采样</span>
                     <input name="sample_count" type="number" min="0" max="50" value="12" class="layui-input">
-                </label>
-            </div>
-        </div>
-
-        <div class="layui-row layui-col-space15">
-            <div class="layui-col-xs12">
-                <label class="layui-form-item relative block">
-                    <span class="help-label"><b>User-Agent</b>UA</span>
-                    <input name="user_agent" class="layui-input" placeholder="{:lang('可选，留空使用当前浏览器 UA')}">
                 </label>
             </div>
         </div>

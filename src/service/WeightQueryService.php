@@ -23,13 +23,20 @@ class WeightQueryService
         $started = microtime(true);
         $platform = self::platform((string) ($data['platform'] ?? ''));
         $input = trim((string) ($data['input'] ?? ''));
-        $channel = trim((string) ($data['channel'] ?? 'auto')) ?: 'auto';
         $ip = trim((string) ($data['ip'] ?? ''));
-        $userAgent = trim((string) ($data['user_agent'] ?? ''));
 
         if ($input === '') {
-            return self::failure($platform, $channel, $input, '请输入账号链接或分享文本', $started, $ip, $userAgent);
+            $channel = trim((string) ($data['channel'] ?? 'auto')) ?: 'auto';
+            $userAgent = trim((string) ($data['user_agent'] ?? ''));
+            return self::failure($platform, $channel, $input, '请输入账号链接或分享文本', $started, $ip, $userAgent, $data);
         }
+
+        if (isset(CookiesService::platforms()[$platform])) {
+            $data = CookiesService::mergeQueryData($platform, $data);
+        }
+
+        $channel = trim((string) ($data['channel'] ?? 'auto')) ?: 'auto';
+        $userAgent = trim((string) ($data['user_agent'] ?? ''));
 
         try {
             $payload = match ($platform) {
@@ -38,12 +45,14 @@ class WeightQueryService
                 default => throw new \RuntimeException('当前平台暂未支持自动查询'),
             };
 
-            $userInfo = is_array($payload['user_info'] ?? null) ? $payload['user_info'] : [];
             $feedList = is_array($payload['feed_list'] ?? null) ? $payload['feed_list'] : [];
+            $userInfo = is_array($payload['user_info'] ?? null) ? $payload['user_info'] : [];
+            $userInfo = self::completeUserInfo($userInfo, $feedList, $platform);
             $analysis = WeightScoreService::analyze($userInfo, $feedList);
+            $cookiesConfig = self::cookiesConfig($data);
 
             $logId = self::saveLog([
-                ...self::baseLog($platform, (string) ($payload['channel'] ?? $channel), $input, $started, $ip, $userAgent),
+                ...self::baseLog($platform, (string) ($payload['channel'] ?? $channel), $input, $started, $ip, $userAgent, $data),
                 ...self::accountFields($userInfo),
                 'fan_count' => $analysis['fan_count'],
                 'follow_count' => $analysis['follow_count'],
@@ -67,12 +76,16 @@ class WeightQueryService
                     'feed_list' => $feedList,
                     'feed_error' => $payload['feed_error'] ?? '',
                     'analysis' => $analysis,
+                    'cookies_config' => $cookiesConfig,
                 ]),
             ]);
 
-            return ['state' => true, 'msg' => '查询成功', 'id' => $logId, 'analysis' => $analysis];
+            CookiesService::markResult((int) ($data['_cookies_id'] ?? 0), true);
+
+            return ['state' => true, 'msg' => '查询成功', 'id' => $logId, 'analysis' => $analysis, 'cookies_config' => $cookiesConfig];
         } catch (Throwable $exception) {
-            return self::failure($platform, $channel, $input, $exception->getMessage(), $started, $ip, $userAgent);
+            CookiesService::markResult((int) ($data['_cookies_id'] ?? 0), false, $exception->getMessage());
+            return self::failure($platform, $channel, $input, $exception->getMessage(), $started, $ip, $userAgent, $data);
         }
     }
 
@@ -140,6 +153,17 @@ class WeightQueryService
                 $options[$target] = $key === 'timeout' ? (int) $data[$key] : (string) $data[$key];
             }
         }
+
+        $extra = CookiesService::paramsToArray($data['params'] ?? '');
+        foreach (['headers', 'params', 'removeParams', 'body', 'bodyType'] as $key) {
+            if (array_key_exists($key, $extra)) {
+                $options[$key] = $extra[$key];
+            }
+            if (array_key_exists($key, $data)) {
+                $options[$key] = $data[$key];
+            }
+        }
+
         return $options;
     }
 
@@ -160,11 +184,14 @@ class WeightQueryService
     /**
      * @return array<string,mixed>
      */
-    private static function baseLog(string $platform, string $channel, string $input, float $started, string $ip, string $userAgent): array
+    private static function baseLog(string $platform, string $channel, string $input, float $started, string $ip, string $userAgent, array $data = []): array
     {
         return [
             'platform' => $platform,
             'channel' => $channel,
+            'cookies_id' => (int) ($data['_cookies_id'] ?? 0),
+            'cookies_name' => (string) ($data['_cookies_name'] ?? ''),
+            'user_uid' => trim((string) ($data['user_uid'] ?? '')),
             'input' => $input,
             'exec_time' => max(0, (int) round((microtime(true) - $started) * 1000)),
             'ip' => $ip,
@@ -175,10 +202,10 @@ class WeightQueryService
     /**
      * @return array<string,mixed>
      */
-    private static function failure(string $platform, string $channel, string $input, string $reason, float $started, string $ip, string $userAgent): array
+    private static function failure(string $platform, string $channel, string $input, string $reason, float $started, string $ip, string $userAgent, array $data = []): array
     {
         $logId = self::saveLog([
-            ...self::baseLog($platform, $channel, $input, $started, $ip, $userAgent),
+            ...self::baseLog($platform, $channel, $input, $started, $ip, $userAgent, $data),
             'status' => WeightQueryLog::STATUS_FAIL,
             'fail_reason' => $reason,
             'weight_score' => 0,
@@ -191,6 +218,20 @@ class WeightQueryService
     }
 
     /**
+     * 返回本次查询实际使用的 Cookie 配置，方便前端展示和原始结果追踪。
+     *
+     * @param array<string,mixed> $data
+     * @return array<string,mixed>
+     */
+    private static function cookiesConfig(array $data): array
+    {
+        return [
+            'id' => (int) ($data['_cookies_id'] ?? 0),
+            'name' => (string) ($data['_cookies_name'] ?? ''),
+        ];
+    }
+
+    /**
      * @param array<string,mixed> $data
      */
     private static function saveLog(array $data): int
@@ -198,6 +239,128 @@ class WeightQueryService
         $log = WeightQueryLog::mk();
         $log->save($data);
         return (int) $log->id;
+    }
+
+    /**
+     * 用户信息接口偶尔会返回空数据，作品列表里的 author 可作为基础账号资料兜底。
+     *
+     * @param array<string,mixed> $userInfo
+     * @param array<int,array<string,mixed>> $feedList
+     * @return array<string,mixed>
+     */
+    private static function completeUserInfo(array $userInfo, array $feedList, string $platform): array
+    {
+        $author = self::firstFeedAuthor($feedList);
+        if ($author === []) {
+            return $userInfo;
+        }
+
+        $total = is_array($userInfo['total'] ?? null) ? $userInfo['total'] : [];
+        $feedTotals = self::feedTotals($feedList);
+
+        return [
+            'platform' => self::firstString($userInfo['platform'] ?? '', $platform),
+            'type' => self::firstString($userInfo['type'] ?? '', 'user'),
+            'user_id' => self::firstString($userInfo['user_id'] ?? '', $author['user_id'] ?? ''),
+            'sec_user_id' => self::firstString($userInfo['sec_user_id'] ?? '', $author['sec_user_id'] ?? ''),
+            'display_id' => self::firstString($userInfo['display_id'] ?? '', $author['display_id'] ?? ''),
+            'nickname' => self::firstString($userInfo['nickname'] ?? '', $author['nickname'] ?? ''),
+            'signature' => (string) ($userInfo['signature'] ?? ''),
+            'avatar_url' => self::firstString($userInfo['avatar_url'] ?? '', $author['avatar_url'] ?? ''),
+            'gender' => (int) ($userInfo['gender'] ?? 0) === 1 ? 1 : 0,
+            'city' => (string) ($userInfo['city'] ?? ''),
+            'total' => [
+                'fan_count' => self::firstPositiveInt($total['fan_count'] ?? null, $total['follower_count'] ?? null),
+                'follow_count' => self::firstPositiveInt($total['follow_count'] ?? null, $total['following_count'] ?? null),
+                'work_count' => self::firstPositiveInt($total['work_count'] ?? null, $total['feed_count'] ?? null, count($feedList)),
+                'like_count' => self::firstPositiveInt($total['like_count'] ?? null, $total['liked_count'] ?? null, $feedTotals['like_count']),
+                'collect_count' => self::firstPositiveInt($total['collect_count'] ?? null, $total['collection_count'] ?? null, $feedTotals['collect_count']),
+            ],
+            'verified' => !empty($userInfo['verified']),
+        ];
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $feedList
+     * @return array<string,mixed>
+     */
+    private static function firstFeedAuthor(array $feedList): array
+    {
+        foreach ($feedList as $feed) {
+            $author = is_array($feed['author'] ?? null) ? $feed['author'] : [];
+            foreach (['user_id', 'sec_user_id', 'display_id', 'nickname', 'avatar_url'] as $key) {
+                if (trim((string) ($author[$key] ?? '')) !== '') {
+                    return $author;
+                }
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $feedList
+     * @return array{like_count:int,collect_count:int}
+     */
+    private static function feedTotals(array $feedList): array
+    {
+        $likes = 0;
+        $collects = 0;
+        foreach ($feedList as $feed) {
+            $total = is_array($feed['total'] ?? null) ? $feed['total'] : [];
+            $likes += max(0, (int) ($total['like_count'] ?? 0));
+            $collects += max(0, (int) ($total['collect_count'] ?? 0));
+        }
+
+        return ['like_count' => $likes, 'collect_count' => $collects];
+    }
+
+    private static function firstString(mixed ...$values): string
+    {
+        foreach ($values as $value) {
+            $value = trim((string) $value);
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+
+    private static function firstPositiveInt(mixed ...$values): int
+    {
+        foreach ($values as $value) {
+            $value = max(0, (int) $value);
+            if ($value > 0) {
+                return $value;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * 将查询原始结果统一整理成前端可解析的 JSON 字符串。
+     *
+     * 新记录会直接保存标准 JSON；旧记录如果曾经被截断或写入了普通文本，
+     * 这里会兜底包成 JSON 对象，避免详情页解析失败。
+     */
+    public static function formatRawResult(string $json): string
+    {
+        $json = trim($json);
+        if ($json === '') {
+            return '{}';
+        }
+
+        $decoded = json_decode($json, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return self::jsonPretty($decoded);
+        }
+
+        return self::jsonPretty([
+            'notice' => '原始结果不是标准JSON，已按文本转换',
+            'raw_text' => $json,
+        ]);
     }
 
     private static function platform(string $platform): string
@@ -221,10 +384,19 @@ class WeightQueryService
     private static function json(array $data): string
     {
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $json = is_string($json) ? $json : '{}';
-        if (function_exists('mb_substr')) {
-            return mb_substr($json, 0, 60000);
+        if (is_string($json)) {
+            return $json;
         }
-        return substr($json, 0, 60000);
+
+        return (string) json_encode([
+            'error' => '原始结果JSON编码失败',
+            'json_error' => json_last_error_msg(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    private static function jsonPretty(mixed $data): string
+    {
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        return is_string($json) ? $json : '{}';
     }
 }

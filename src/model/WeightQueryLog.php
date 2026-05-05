@@ -12,6 +12,9 @@ use think\admin\Model;
  * @property int $id
  * @property string $platform
  * @property string $channel
+ * @property int $cookies_id
+ * @property string $cookies_name
+ * @property string $user_uid
  * @property string $input
  * @property string $account_id
  * @property string $display_id

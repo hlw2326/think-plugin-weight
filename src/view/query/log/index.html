@@ -4,8 +4,12 @@
 <!--{if auth("query")}-->
 <a data-modal='{:url("query")}' data-title="{:lang('发起查询')}" class='layui-btn layui-btn-sm layui-btn-normal'>{:lang('发起查询')}</a>
 <!--{/if}-->
+<!--{if auth("remove")}-->
+<a data-action='{:url("remove")}' data-rule="id#{id}" data-confirm="{:lang('确定要删除选中的查询记录吗？')}" data-table-id="WeightQueryLogTable" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('删除选中')}</a>
+<!--{/if}-->
 <!--{if auth("clear")}-->
-<a data-action='{:url("clear")}' data-confirm="{:lang('确定要清理30天前的查询记录吗？')}" data-callback="reload" data-table-id="WeightQueryLogTable" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('清理日志')}</a>
+<a data-action='{:url("clear")}' data-value="keep_days#30" data-confirm="{:lang('确定要清理30天前的查询记录吗？')}" data-table-id="WeightQueryLogTable" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('清理30天前')}</a>
+<a data-action='{:url("clear")}' data-value="keep_days#0" data-confirm="{:lang('确定要清空全部查询记录吗？此操作不可恢复！')}" data-table-id="WeightQueryLogTable" class='layui-btn layui-btn-sm layui-btn-primary'>{:lang('清空日志')}</a>
 <!--{/if}-->
 {/block}
 
@@ -25,6 +29,22 @@
 
 <script type="text/html" id="ChannelTpl">
     {{- $.enumLabel('channels', d.channel) }}
+</script>
+
+<script type="text/html" id="CookieTpl">
+    {{# if(d.cookies_name){ }}
+    <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;" title="{{d.cookies_name}}">{{d.cookies_name}}</div>
+    {{# } else { }}
+    <span class="color-desc">自动</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="UserUidTpl">
+    {{# if(d.user_uid){ }}
+    <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;" title="{{d.user_uid}}">{{d.user_uid}}</div>
+    {{# } else { }}
+    <span class="color-desc">-</span>
+    {{# } }}
 </script>
 
 <script type="text/html" id="GradeTpl">
@@ -67,7 +87,7 @@
 
 <script type="text/html" id="toolbar">
     <!--{if auth("detail")}-->
-    <a class="layui-btn layui-btn-sm" data-modal='{:url("detail")}?id={{d.id}}' data-title="{:lang('查询详情')}">{:lang('查 看')}</a>
+    <a class="layui-btn layui-btn-sm"  data-offset="1%" data-width="60%" data-modal='{:url("detail")}?id={{d.id}}' data-title="{:lang('查询详情')}">{:lang('查 看')}</a>
     <!--{/if}-->
 </script>
 
@@ -89,9 +109,12 @@
             even: true, height: 'full',
             sort: {field: 'id', type: 'desc'},
             cols: [[
+                {type: 'checkbox', fixed: 'left'},
                 {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
                 {field: 'platform', title: '{:lang("平台")}', width: 100, align: 'center', templet: '#PlatformTpl'},
                 {field: 'channel', title: '{:lang("渠道")}', width: 90, align: 'center', templet: '#ChannelTpl'},
+                {field: 'cookies_name', title: 'Cookie配置', width: 150, templet: '#CookieTpl'},
+                {field: 'user_uid', title: '用户UID', width: 130, templet: '#UserUidTpl'},
                 {field: 'input', title: '{:lang("查询内容")}', minWidth: 220, templet: '#InputTpl'},
                 {field: 'nickname', title: '{:lang("账号")}', minWidth: 160, templet: '#AccountTpl'},
                 {field: 'fan_count', title: '{:lang("数据")}', width: 150, templet: '#MetricTpl'},

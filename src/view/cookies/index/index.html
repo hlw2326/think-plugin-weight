@@ -1,0 +1,121 @@
+{extend name="table"}
+
+{block name="button"}
+<!--{if auth("add")}-->
+<button data-modal='{:url("add")}' data-title="{:lang('添加 Cookie 配置')}" class='layui-btn layui-btn-sm layui-btn-primary'>{:lang('添加配置')}</button>
+<!--{/if}-->
+<!--{if auth("remove")}-->
+<a data-confirm="{:lang('确定要删除这些 Cookie 配置吗？')}" data-table-id="WeightCookiesTable" data-action='{:url("remove")}' data-rule="id#{id}" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('批量删除')}</a>
+<!--{/if}-->
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='cookies/index/index_search'}
+    <table id="WeightCookiesTable" data-url="{:sysuri('index')}" data-target-search="form.form-search"></table>
+</div>
+
+<label class="layui-hide"><textarea id="PlatformsData">{:json_encode($platforms, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="ChannelsData">{:json_encode($channels, JSON_UNESCAPED_UNICODE)}</textarea></label>
+<label class="layui-hide"><textarea id="StatusesData">{:json_encode($statuses, JSON_UNESCAPED_UNICODE)}</textarea></label>
+
+<script type="text/html" id="PlatformTpl">
+    {{- $.platformEnumLabel('platforms', d.platform) }}
+</script>
+
+<script type="text/html" id="ChannelTpl">
+    {{- $.platformEnumLabel('channels', d.channel) }}
+</script>
+
+<script type="text/html" id="ConfigTpl">
+    <div><b>{{d.name || '-'}}</b>{{# if(d.is_default > 0){ }} <span class="layui-badge layui-bg-blue">{:lang('默认')}</span>{{# } }}</div>
+    <div class="color-desc font-s12">{{d.remark || '-'}}</div>
+</script>
+
+<script type="text/html" id="SecretTpl">
+    <div class="font-s12">Cookie：{{d.cookies ? (d.cookies.length + ' 字符') : '-'}}</div>
+    <div class="font-s12 color-desc">UA：{{$.maskText(d.user_agent, 34)}}</div>
+    <div class="font-s12 color-desc">DID：{{$.maskText(d.did, 24)}}</div>
+</script>
+
+<script type="text/html" id="MetricTpl">
+    <div class="font-s12">超时 {{d.timeout || 0}} ms / 采样 {{d.sample_count || 0}}</div>
+    <div class="font-s12 color-desc">成功 {{d.success_count || 0}} / 失败 {{d.fail_count || 0}}</div>
+</script>
+
+<script type="text/html" id="StatusSwitchTpl">
+    <!--{if auth("state")}-->
+    <input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="{:lang('启用')}|{:lang('禁用')}" lay-filter="StatusSwitch" {{-d.status>0?'checked':''}}>
+    <!--{else}-->
+    {{- $.platformEnumLabel('statuses', d.status) }}
+    <!--{/if}-->
+</script>
+
+<script type="text/html" id="SortInputTpl">
+    <input type="number" min="0" data-blur-number="0" data-action-blur="{:sysuri()}" data-value="id#{{d.id}};action#sort;sort#{value}" data-loading="false" value="{{d.sort || 0}}" class="layui-input text-center">
+</script>
+
+<script type="text/html" id="toolbar">
+    <!--{if auth("edit")}-->
+    <a class="layui-btn layui-btn-sm" data-title="{:lang('编辑 Cookie 配置')}" data-modal='{:url("edit")}?id={{d.id}}'>{:lang('编 辑')}</a>
+    <!--{/if}-->
+    <!--{if auth("default")}-->
+    {{# if(d.is_default <= 0){ }}
+    <a class="layui-btn layui-btn-sm layui-btn-normal" data-action="{:url('default')}" data-value="id#{{d.id}}" data-table-id="WeightCookiesTable">{:lang('默认')}</a>
+    {{# } }}
+    <!--{/if}-->
+    <!--{if auth("remove")}-->
+    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="{:lang('确定要删除该 Cookie 配置吗？')}" data-action="{:url('remove')}" data-value="id#{{d.id}}">{:lang('删 除')}</a>
+    <!--{/if}-->
+</script>
+
+<script>
+    $.weightPlatformEnums = {
+        platforms: JSON.parse($('#PlatformsData').text()),
+        channels: JSON.parse($('#ChannelsData').text()),
+        statuses: JSON.parse($('#StatusesData').text())
+    };
+
+    $.platformEnumLabel = function (type, key) {
+        var item = ($.weightPlatformEnums[type] || {})[key];
+        if (!item) return key || '-';
+        return '<span class="layui-badge ' + item.class + '">' + item.label + '</span>';
+    };
+
+    $.maskText = function (value, limit) {
+        value = value || '';
+        if (!value) return '-';
+        return value.length > limit ? value.substring(0, limit) + '...' : value;
+    };
+
+    $(function () {
+        $('#WeightCookiesTable').layTable({
+            even: true, height: 'full',
+            sort: {field: 'sort', type: 'desc'},
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'sort', title: '{:lang("排序")}', width: 90, align: 'center', templet: '#SortInputTpl'},
+                {field: 'platform', title: '{:lang("平台")}', width: 95, align: 'center', templet: '#PlatformTpl'},
+                {field: 'channel', title: '{:lang("渠道")}', width: 95, align: 'center', templet: '#ChannelTpl'},
+                {field: 'name', title: '{:lang("配置")}', minWidth: 190, templet: '#ConfigTpl'},
+                {field: 'cookies', title: '{:lang("请求身份")}', minWidth: 230, templet: '#SecretTpl'},
+                {field: 'timeout', title: '{:lang("参数")}', width: 170, templet: '#MetricTpl'},
+                {field: 'last_used_at', title: '{:lang("最后使用")}', width: 165, align: 'center'},
+                {field: 'expired_at', title: '{:lang("预计失效")}', width: 165, align: 'center'},
+                {field: 'status', title: '{:lang("状态")}', width: 100, align: 'center', templet: '#StatusSwitchTpl'},
+                {toolbar: '#toolbar', title: '{:lang("操作面板")}', width: 210, align: 'left', fixed: 'right'}
+            ]]
+        });
+
+        layui.form.on('switch(StatusSwitch)', function (obj) {
+            var data = {id: obj.value, status: obj.elem.checked > 0 ? 1 : 0};
+            $.form.load("{:url('state')}", data, 'post', function (ret) {
+                if (ret.code < 1) $.msg.error(ret.info, 3, function () {
+                    $('#WeightCookiesTable').trigger('reload');
+                }); else $('#WeightCookiesTable').trigger('reload');
+                return false;
+            }, false);
+        });
+    });
+</script>
+{/block}

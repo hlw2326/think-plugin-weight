@@ -20,6 +20,7 @@ use plugin\weight\analyzer\field\Platform;
 use plugin\weight\analyzer\field\Score;
 use plugin\weight\analyzer\field\SecUserId;
 use plugin\weight\analyzer\field\Signature;
+use plugin\weight\analyzer\field\Tags;
 use plugin\weight\analyzer\field\Type;
 use plugin\weight\analyzer\field\UserId;
 use plugin\weight\analyzer\field\Verified;
@@ -76,6 +77,7 @@ class Analyzer
             new LikeCount($likeCount),
             new CollectCount($collectCount),
             new Verified(!empty($userInfo['verified'])),
+            new Tags($feedList),
             $work,
             new Date($feedList),
         ];

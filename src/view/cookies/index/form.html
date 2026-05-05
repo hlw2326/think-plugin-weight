@@ -1,0 +1,114 @@
+<form action="{:sysuri()}" method="post" data-auto="true" class="layui-form layui-card">
+    <div class="layui-card-body padding-left-40">
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs6">
+                <label class="layui-form-item relative block label-required-prev">
+                    <span class="help-label"><b>{:lang('配置名称')}</b>Name</span>
+                    <input name="name" value='{$vo.name|default=""}' required maxlength="80"
+                        placeholder="{:lang('如：抖音 Web 主 Cookie')}" class="layui-input">
+                </label>
+            </div>
+            <div class="layui-col-xs3">
+                <div class="layui-form-item">
+                    <span class="help-label"><b>{:lang('平台')}</b>Platform</span>
+                    <select name="platform" class="layui-select" lay-append-to>
+                        {foreach $platforms as $k => $v}
+                        <option value="{$k}" {if (isset($vo.platform) and $vo.platform eq $k) or (empty($vo.platform) and $k eq 'dy')}selected{/if}>{$v.label}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-col-xs3">
+                <div class="layui-form-item">
+                    <span class="help-label"><b>{:lang('渠道')}</b>Channel</span>
+                    <select name="channel" class="layui-select" lay-append-to>
+                        {foreach $channels as $k => $v}
+                        <option value="{$k}" {if (isset($vo.channel) and $vo.channel eq $k) or (empty($vo.channel) and $k eq 'live')}selected{/if}>{$v.label}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <span class="help-label"><b>Cookies</b>Cookie</span>
+            <textarea name="cookies" class="layui-textarea" style="min-height:130px"
+                placeholder="{:lang('填写平台 Cookie，可留空后续再补')}">{$vo.cookies|default=''}</textarea>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs8">
+                <label class="layui-form-item relative block">
+                    <span class="help-label"><b>User-Agent</b>UA</span>
+                    <input name="user_agent" value='{$vo.user_agent|default=""}' maxlength="1000"
+                        placeholder="{:lang('请求使用的 User-Agent')}" class="layui-input">
+                </label>
+            </div>
+            <div class="layui-col-xs4">
+                <label class="layui-form-item relative block">
+                    <span class="help-label"><b>DID</b>DeviceId</span>
+                    <input name="did" value='{$vo.did|default=""}' maxlength="255"
+                        placeholder="{:lang('快手等平台设备标识')}" class="layui-input">
+                </label>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <span class="help-label"><b>{:lang('扩展参数')}</b>ParamsJson</span>
+            <textarea name="params" class="layui-textarea" style="min-height:120px"
+                placeholder='必须是 JSON 对象，例如 {"headers":{"Referer":"https://www.douyin.com/"},"params":{"msToken":"xxx"}}'>{$vo.params|default=''}</textarea>
+            <span class="help-block">{:lang('会合并到 SDK 请求 options，常用键：headers、params、removeParams、body、bodyType。')}</span>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs4">
+                <label class="layui-form-item relative block">
+                    <span class="help-label"><b>{:lang('超时')}</b>Timeout</span>
+                    <input name="timeout" type="number" min="1000" max="60000" value='{$vo.timeout|default="10000"}' class="layui-input">
+                </label>
+            </div>
+            <div class="layui-col-xs4">
+                <label class="layui-form-item relative block">
+                    <span class="help-label"><b>{:lang('采样数')}</b>SampleCount</span>
+                    <input name="sample_count" type="number" min="0" max="50" value='{$vo.sample_count|default="12"}' class="layui-input">
+                </label>
+            </div>
+            <div class="layui-col-xs4">
+                <label class="layui-form-item relative block">
+                    <span class="help-label"><b>{:lang('预计失效')}</b>ExpiredAt</span>
+                    <input data-date-input name="expired_at" value='{$vo.expired_at|default=""}'
+                        placeholder="{:lang('留空表示未知')}" class="layui-input">
+                </label>
+            </div>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12">
+                <div class="layui-form-item">
+                    <span class="help-label"><b>{:lang('默认配置')}</b>Default</span>
+                    <select name="is_default" class="layui-select" lay-append-to>
+                        <option value="0" {if !isset($vo.is_default) || $vo.is_default == 0}selected{/if}>{:lang('普通配置')}</option>
+                        <option value="1" {if isset($vo.is_default) && $vo.is_default == 1}selected{/if}>{:lang('设为该平台默认配置')}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <span class="help-label"><b>{:lang('备注')}</b>Remark</span>
+            <textarea name="remark" class="layui-textarea" style="min-height:70px"
+                placeholder="{:lang('记录 Cookie 来源、用途、有效期等说明')}">{$vo.remark|default=''}</textarea>
+        </div>
+
+    </div>
+
+    <div class="hr-line-dashed"></div>
+
+    {notempty name='vo.id'}<input type="hidden" value="{$vo.id}" name="id">{/notempty}
+
+    <div class="layui-form-item text-center">
+        <button class="layui-btn" type="submit" lay-submit>{:lang('保存配置')}</button>
+        <button class="layui-btn layui-btn-danger" type="button" data-close>{:lang('取消操作')}</button>
+    </div>
+</form>

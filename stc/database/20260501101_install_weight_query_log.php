@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Phinx\Db\Adapter\MysqlAdapter;
 use think\admin\extend\PhinxExtend;
 use think\migration\Migrator;
 
@@ -29,6 +30,9 @@ class InstallWeightQueryLog extends Migrator
         PhinxExtend::upgrade($table, [
             ['platform', 'string', ['limit' => 30, 'default' => '', 'null' => true, 'comment' => '平台标识（dy/ks/xhs/bili/wb/sph/tk/other）']],
             ['channel', 'string', ['limit' => 20, 'default' => 'auto', 'null' => true, 'comment' => '查询渠道']],
+            ['cookies_id', 'integer', ['limit' => 11, 'default' => 0, 'null' => true, 'comment' => 'Cookie配置ID']],
+            ['cookies_name', 'string', ['limit' => 120, 'default' => '', 'null' => true, 'comment' => 'Cookie配置名称']],
+            ['user_uid', 'string', ['limit' => 120, 'default' => '', 'null' => true, 'comment' => '用户UID，外部传入，未传为空']],
             ['input', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '输入链接或分享文本']],
             ['account_id', 'string', ['limit' => 120, 'default' => '', 'null' => true, 'comment' => '平台账号ID']],
             ['display_id', 'string', ['limit' => 120, 'default' => '', 'null' => true, 'comment' => '展示账号ID']],
@@ -55,10 +59,10 @@ class InstallWeightQueryLog extends Migrator
             ['exec_time', 'integer', ['limit' => 11, 'default' => 0, 'null' => true, 'comment' => '执行耗时(毫秒)']],
             ['ip', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => '请求IP']],
             ['user_agent', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => 'User-Agent']],
-            ['raw_result', 'text', ['default' => null, 'null' => true, 'comment' => '原始结果JSON']],
+            ['raw_result', 'text', ['limit' => MysqlAdapter::TEXT_LONG, 'default' => null, 'null' => true, 'comment' => '原始结果JSON longtext']],
             ['create_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP', 'null' => false, 'comment' => '创建时间']],
         ], [
-            'platform', 'channel', 'status', 'weight_grade', 'create_at', 'account_id', 'display_id',
+            'platform', 'channel', 'cookies_id', 'status', 'weight_grade', 'create_at', 'user_uid', 'account_id', 'display_id',
         ]);
     }
 }

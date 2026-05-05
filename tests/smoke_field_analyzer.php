@@ -20,6 +20,7 @@ use plugin\weight\analyzer\field\Platform;
 use plugin\weight\analyzer\field\Score;
 use plugin\weight\analyzer\field\SecUserId;
 use plugin\weight\analyzer\field\Signature;
+use plugin\weight\analyzer\field\Tags;
 use plugin\weight\analyzer\field\Type;
 use plugin\weight\analyzer\field\UserId;
 use plugin\weight\analyzer\field\Verified;
@@ -209,6 +210,20 @@ if (($workItemValue['item_id'] ?? '') !== 'item_1' || ($workItemValue['author'][
 assertOwnTips($workItem);
 assertToArrayTips($workItem);
 
+$accountTags = new Tags($feedList);
+$accountTagValue = $accountTags->value();
+if (($accountTagValue['primary_tag'] ?? '') !== '账号分析' || ($accountTagValue['tagged_feed_count'] ?? 0) !== 2 || ($accountTagValue['tag_count'] ?? 0) !== 2) {
+    throw new RuntimeException('账号标签字段应根据作品 tags 聚合主标签和标签数量');
+}
+if (($accountTagValue['top_tags'][0]['tag_name'] ?? '') !== '账号分析' || ($accountTagValue['top_tags'][1]['tag_name'] ?? '') !== '内容运营') {
+    throw new RuntimeException('账号标签字段应按出现次数和首次出现顺序输出标签');
+}
+if ((new Tags([]))->value()['primary_tag'] !== '' || empty((new Tags([]))->tips())) {
+    throw new RuntimeException('空作品列表应返回空账号标签并给出提示');
+}
+assertOwnTips($accountTags);
+assertToArrayTips($accountTags);
+
 $work = new Work($feedList, 120000);
 $workValue = $work->value();
 if (($workValue['avg_like_count'] ?? 0) !== 1000 || ($workValue['avg_collect_count'] ?? 0) !== 35) {
@@ -294,6 +309,9 @@ if ($analysis['score'] < 70 || !in_array($analysis['grade'], ['S', 'A'], true)) 
 
 if (($analysis['fields']['nickname']['label'] ?? '') !== '昵称') {
     throw new RuntimeException('字段明细缺少昵称');
+}
+if (($analysis['fields']['account_tags']['value']['primary_tag'] ?? '') !== '账号分析') {
+    throw new RuntimeException('字段明细缺少账号标签分析');
 }
 foreach ($analysis['fields'] as $field) {
     if (empty($field['tips']) || isset($field['messages'])) {
