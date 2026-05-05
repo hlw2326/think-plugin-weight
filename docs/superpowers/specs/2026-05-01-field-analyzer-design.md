@@ -82,7 +82,7 @@
 - `key()`：字段标识。
 - `label()`：中文名称。
 - `value()`：归一化后的字段值。
-- `messages()`：中文检测说明。
+- `tips()`：中文检测说明。
 - `toArray()`：输出给详情页和原始分析 JSON。
 
 字段对象不再暴露 `score()`、`weight()`、`level()` 方法，`fields` 明细也不再输出 `score`、`weight`、`level` 三个键；总分只由总分析器集中计算。

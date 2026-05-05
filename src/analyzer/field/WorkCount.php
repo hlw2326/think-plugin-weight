@@ -27,8 +27,9 @@ class WorkCount extends AbstractField
         return $this->intValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
+        if ($this->value() < 1) return ['作品数为空或为 0，账号内容沉淀不足'];
         if ($this->value() < 10) return ['作品数量较少，账号内容沉淀不足'];
         if ($this->value() < 50) return ['作品数量正常，仍有提升空间'];
         return ['作品数量较充足，内容沉淀较好'];

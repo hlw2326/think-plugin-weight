@@ -27,8 +27,9 @@ class LikeCount extends AbstractField
         return $this->intValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
+        if ($this->value() < 1) return ['获赞数为空或为 0，内容互动基础不足'];
         if ($this->value() < 1000) return ['获赞数偏低，内容互动基础较弱'];
         if ($this->value() < 50000) return ['获赞数处于成长阶段'];
         return ['获赞数较高，内容历史表现较好'];

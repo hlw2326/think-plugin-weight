@@ -27,8 +27,9 @@ class FanCount extends AbstractField
         return $this->intValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
+        if ($this->value() < 1) return ['粉丝数为空或为 0，账号权重基础不足'];
         if ($this->value() < 1000) return ['粉丝规模较小，账号权重基础偏弱'];
         if ($this->value() < 10000) return ['粉丝规模处于起步阶段'];
         if ($this->value() < 100000) return ['粉丝规模较稳定，具备基础影响力'];

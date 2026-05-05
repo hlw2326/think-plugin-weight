@@ -27,9 +27,13 @@ class Type extends MetadataField
         return $this->stringValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
-        if ($this->value() === 'user') {
+        $type = $this->value();
+        if ($type === '') {
+            return ['类型为空，无法确认当前数据结构'];
+        }
+        if ($type === 'user') {
             return ['类型字段已获取'];
         }
         return ['类型不是 user，请检查 SDK 返回结构'];

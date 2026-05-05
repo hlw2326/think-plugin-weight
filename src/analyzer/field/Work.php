@@ -92,22 +92,22 @@ class Work extends AbstractField
         return $this->metrics = $metrics;
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         $value = $this->value();
         if ((int) $value['sample_feed_count'] < 1) {
             return ['作品列表为空，无法判断近期内容表现'];
         }
 
-        $messages = [];
-        if ((int) $value['avg_like_count'] < 100) $messages[] = '作品平均点赞偏低';
-        if ((int) $value['avg_comment_count'] < 10) $messages[] = '评论互动偏弱';
-        if ((int) $value['avg_share_count'] < 5) $messages[] = '分享传播偏弱';
-        if ((int) $value['avg_collect_count'] < 5) $messages[] = '收藏沉淀偏弱';
-        if ((int) $value['avg_play_count'] < 1000) $messages[] = '播放曝光偏弱';
-        if ((float) $value['interaction_rate'] <= 0.2) $messages[] = '互动率偏低，内容触达后反馈不足';
+        $tips = [];
+        if ((int) $value['avg_like_count'] < 100) $tips[] = '作品平均点赞偏低';
+        if ((int) $value['avg_comment_count'] < 10) $tips[] = '评论互动偏弱';
+        if ((int) $value['avg_share_count'] < 5) $tips[] = '分享传播偏弱';
+        if ((int) $value['avg_collect_count'] < 5) $tips[] = '收藏沉淀偏弱';
+        if ((int) $value['avg_play_count'] < 1000) $tips[] = '播放曝光偏弱';
+        if ((float) $value['interaction_rate'] <= 0.2) $tips[] = '互动率偏低，内容触达后反馈不足';
 
-        return $messages ?: ['作品互动表现较稳定'];
+        return $tips ?: ['作品互动表现较稳定'];
     }
 
     /**

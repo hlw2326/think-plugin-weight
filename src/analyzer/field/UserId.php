@@ -26,4 +26,13 @@ class UserId extends MetadataField
     {
         return $this->stringValue();
     }
+
+    public function tips(): array
+    {
+        $userId = $this->value();
+        if ($userId === '') return ['用户ID为空，账号去重和关联查询会受影响'];
+        if (mb_strlen($userId) < 3) return ['用户ID偏短，建议检查 SDK 返回字段'];
+        if (preg_match('/^0+$/', $userId) === 1) return ['用户ID全为 0，建议检查 SDK 返回字段'];
+        return ['用户ID已获取，便于账号去重和关联查询'];
+    }
 }

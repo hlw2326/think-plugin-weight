@@ -72,7 +72,7 @@ class Pool extends AbstractField
         ];
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         $value = $this->value();
         return ["账号当前接近{$value['label']}，流量池分 {$value['pool_score']}。"];

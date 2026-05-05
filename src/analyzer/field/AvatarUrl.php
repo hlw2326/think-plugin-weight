@@ -27,8 +27,12 @@ class AvatarUrl extends MetadataField
         return $this->stringValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
-        return [$this->value() === '' ? '头像地址为空' : '头像地址已获取'];
+        $url = $this->value();
+        if ($url === '') return ['头像地址为空，账号基础资料不完整'];
+        if (!filter_var($url, FILTER_VALIDATE_URL)) return ['头像地址格式无效，建议检查 SDK 返回字段'];
+        if (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) return ['头像地址协议异常，建议使用 http 或 https 链接'];
+        return ['头像地址已获取，账号基础资料较完整'];
     }
 }

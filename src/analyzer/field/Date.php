@@ -75,7 +75,7 @@ class Date extends AbstractField
         ];
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->hasHistory() ? '已根据历史作品表现生成未来一周发布时间' : '历史作品不足，已使用平台常见高峰时段生成发布时间'];
     }

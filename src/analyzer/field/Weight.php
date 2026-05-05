@@ -61,7 +61,7 @@ class Weight extends AbstractField
         ];
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->summary()];
     }
@@ -104,9 +104,9 @@ class Weight extends AbstractField
     private function hasWeakMessage(array $field): bool
     {
         $keywords = ['为空', '偏低', '偏弱', '不足', '过少', '未认证', '过短', '过长', '略高', '过高', '无法判断', '不在 SDK 标准范围', '不是 user'];
-        foreach (is_array($field['messages'] ?? null) ? $field['messages'] : [] as $message) {
+        foreach (is_array($field['tips'] ?? null) ? $field['tips'] : [] as $tip) {
             foreach ($keywords as $keyword) {
-                if (str_contains((string) $message, $keyword)) {
+                if (str_contains((string) $tip, $keyword)) {
                     return true;
                 }
             }

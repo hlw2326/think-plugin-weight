@@ -26,4 +26,13 @@ class SecUserId extends MetadataField
     {
         return $this->stringValue();
     }
+
+    public function tips(): array
+    {
+        $secUserId = $this->value();
+        if ($secUserId === '') return ['加密用户ID为空，后续接口请求可能受限'];
+        if (mb_strlen($secUserId) < 8) return ['加密用户ID偏短，建议检查 SDK 返回字段'];
+        if (preg_match('/\s/u', $secUserId) === 1) return ['加密用户ID包含空格，建议检查 SDK 返回字段'];
+        return ['加密用户ID已获取，便于后续接口请求'];
+    }
 }

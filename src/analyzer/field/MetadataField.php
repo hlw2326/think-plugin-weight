@@ -14,7 +14,7 @@ namespace plugin\weight\analyzer\field;
  */
 abstract class MetadataField extends AbstractField
 {
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->isFilled() ? $this->label() . '已获取' : $this->label() . '为空'];
     }

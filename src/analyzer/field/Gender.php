@@ -27,6 +27,14 @@ class Gender extends MetadataField
         return max(0, (int) $this->rawValue);
     }
 
+    public function tips(): array
+    {
+        $gender = $this->value();
+        if ($gender === 0) return ['性别未知，账号画像维度不足'];
+        if (in_array($gender, [1, 2], true)) return ['性别字段已获取，账号画像更完整'];
+        return ['性别值不在常见范围，建议检查 SDK 返回字段'];
+    }
+
     protected function isFilled(): bool
     {
         return in_array($this->value(), [0, 1], true);

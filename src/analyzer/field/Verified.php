@@ -27,7 +27,7 @@ class Verified extends AbstractField
         return (bool) $this->rawValue;
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->value() ? '账号已认证，可信度更高' : '账号未认证，可信度加分不足'];
     }

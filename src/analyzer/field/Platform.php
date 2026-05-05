@@ -27,14 +27,15 @@ class Platform extends MetadataField
         return $this->stringValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
-        if ($this->value() === '') {
+        $platform = $this->value();
+        if ($platform === '') {
             return ['平台为空，无法判断账号来源'];
         }
-        if (!in_array($this->value(), ['dy', 'ks'], true)) {
+        if (!in_array($platform, ['dy', 'ks'], true)) {
             return ['平台不在 SDK 标准范围内'];
         }
-        return ['平台字段已获取'];
+        return [$platform === 'dy' ? '平台为抖音，账号来源已确认' : '平台为快手，账号来源已确认'];
     }
 }

@@ -177,16 +177,16 @@ class Analyzer
      */
     private static function suggestions(array $fields): array
     {
-        $messages = [];
+        $tips = [];
         foreach ($fields as $field) {
-            foreach ($field->messages() as $message) {
-                if (self::isWeakMessage($message)) {
-                    $messages[] = $message;
+            foreach ($field->tips() as $tip) {
+                if (self::isWeakMessage($tip)) {
+                    $tips[] = $tip;
                 }
             }
         }
 
-        return $messages ?: ['账号基础表现较稳定，建议持续更新优质内容并保持互动。'];
+        return $tips ?: ['账号基础表现较稳定，建议持续更新优质内容并保持互动。'];
     }
 
     /**
@@ -203,15 +203,15 @@ class Analyzer
             return [];
         }
 
-        $messages = [];
+        $tips = [];
         foreach ($fields as $field) {
-            foreach ($field->messages() as $message) {
-                if (self::isWeakMessage($message)) {
-                    $messages[] = $message;
+            foreach ($field->tips() as $tip) {
+                if (self::isWeakMessage($tip)) {
+                    $tips[] = $tip;
                 }
             }
         }
-        return $messages;
+        return $tips;
     }
 
     /**

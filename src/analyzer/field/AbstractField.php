@@ -11,7 +11,7 @@ use JsonSerializable;
  *
  * 作用：
  * - 统一字段对象的输出格式和原始值转换方法。
- * - 每个具体字段类只需要实现 key、label、value 和可选 messages。
+ * - 每个具体字段类只需要实现 key、label、value 和可选 tips。
  * - Analyzer 会把所有字段对象汇总成 fields 明细。
  */
 abstract class AbstractField implements JsonSerializable
@@ -41,11 +41,11 @@ abstract class AbstractField implements JsonSerializable
     /**
      * 当前字段的中文检测说明。
      *
-     * 总分析器会根据 messages 里的风险描述收集优化建议。
+     * 总分析器会根据 tips 里的风险描述收集优化建议。
      *
      * @return array<int,string>
      */
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->label() . '检测完成'];
     }
@@ -61,7 +61,7 @@ abstract class AbstractField implements JsonSerializable
             'key' => $this->key(),
             'label' => $this->label(),
             'value' => $this->value(),
-            'messages' => $this->messages(),
+            'tips' => $this->tips(),
         ];
     }
 

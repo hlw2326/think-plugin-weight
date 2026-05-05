@@ -46,7 +46,7 @@ class Score extends AbstractField
         ];
     }
 
-    public function messages(): array
+    public function tips(): array
     {
         return [$this->description()];
     }

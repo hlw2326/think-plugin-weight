@@ -27,8 +27,9 @@ class CollectCount extends AbstractField
         return $this->intValue();
     }
 
-    public function messages(): array
+    public function tips(): array
     {
+        if ($this->value() < 1) return ['收藏数为空或为 0，内容长期沉淀不足'];
         if ($this->value() < 100) return ['收藏数偏低，内容长期沉淀不足'];
         if ($this->value() < 10000) return ['收藏数处于成长阶段'];
         return ['收藏数较高，内容沉淀表现较好'];

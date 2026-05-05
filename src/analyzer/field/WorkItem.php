@@ -71,7 +71,44 @@ class WorkItem implements JsonSerializable
      */
     public function toArray(): array
     {
-        return $this->data;
+        return [
+            ...$this->data,
+            'tips' => $this->tips(),
+        ];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    public function tips(): array
+    {
+        $tips = [];
+
+        if ($this->data['item_id'] === '') {
+            $tips[] = '作品ID为空，单条作品无法稳定追踪';
+        }
+
+        if ($this->data['desc'] === '') {
+            $tips[] = '作品描述为空，内容主题识别度不足';
+        }
+
+        if ((int) $this->data['create_time'] < 1) {
+            $tips[] = '作品发布时间为空，无法参与发布时间预测';
+        }
+
+        if ($this->data['cover_url'] === '') {
+            $tips[] = '作品封面为空，内容展示资料不完整';
+        }
+
+        if ((int) $this->data['total']['play_count'] < 1) {
+            $tips[] = '作品播放数为空或为 0，曝光表现不足';
+        }
+
+        if ($this->data['author']['nickname'] === '') {
+            $tips[] = '作品作者昵称为空，作者信息不完整';
+        }
+
+        return $tips === [] ? ['单条作品数据完整，可用于作品表现分析'] : $tips;
     }
 
     /**
