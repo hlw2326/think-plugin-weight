@@ -358,6 +358,18 @@ if (($analysis['fields']['weight']['value']['grade'] ?? '') !== $analysis['grade
     throw new RuntimeException('字段明细缺少账号权重结论');
 }
 
+if (($analysis['page']['user']['tags'][0]['text'] ?? '') !== '账号分析') {
+    throw new RuntimeException('小程序页面数据应输出账号标签');
+}
+
+if (($analysis['page']['analysis']['currentLevel'] ?? -1) < 1 || count($analysis['page']['analysis']['metrics'] ?? []) !== 4) {
+    throw new RuntimeException('小程序页面数据应输出综合评估');
+}
+
+if (empty($analysis['page']['advice']) || empty($analysis['page']['traffic']) || empty($analysis['page']['valuation'])) {
+    throw new RuntimeException('小程序页面数据应输出建议、流量池和估值');
+}
+
 foreach ($analysis['fields'] as $field) {
     if (array_key_exists('score', $field) || array_key_exists('weight', $field) || array_key_exists('level', $field)) {
         throw new RuntimeException('字段明细不应再输出 score/weight/level');

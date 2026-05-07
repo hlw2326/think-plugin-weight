@@ -81,8 +81,8 @@ foreach (['douyin.html', 'kuaishou.html'] as $view) {
 }
 
 $service = (string) file_get_contents(__DIR__ . '/../src/Service.php');
-if (!str_contains($service, 'Cookie配置池') || !str_contains($service, 'cookies.index/index')) {
-    throw new RuntimeException('Cookie配置池应作为独立菜单入口注册');
+if (!str_contains($service, '凭证管理') || !str_contains($service, 'cookies.index/index')) {
+    throw new RuntimeException('凭证管理应作为独立菜单入口注册');
 }
 
 if (is_file(__DIR__ . '/../src/view/config/index/tabs.html')) {

@@ -42,9 +42,14 @@ class Service extends Plugin
                 'node' => "{$code}/config.index/index",
             ],
             [
-                'name' => 'Cookie配置池',
+                'name' => '凭证管理',
                 'icon' => 'layui-icon layui-icon-template-1',
                 'node' => "{$code}/cookies.index/index",
+            ],
+            [
+                'name' => '标签管理',
+                'icon' => 'layui-icon layui-icon-note',
+                'node' => "{$code}/tags.index/index",
             ],
             [
                 'name' => '查询记录',

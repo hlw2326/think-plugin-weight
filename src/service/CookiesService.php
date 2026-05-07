@@ -9,13 +9,13 @@ use plugin\weight\model\WeightCookies;
 use Throwable;
 
 /**
- * 平台请求 Cookie 配置服务。
+ * 平台请求 Cookie 配置服务
  *
  * 作用：
- * - 保存和读取平台 Cookie 配置池中的 Cookie、UA、DID 和扩展参数。
- * - 支持抖音按 h5/web/live 分渠道配置，其他平台按 web/app/mini/default 扩展。
- * - 查询时用后台默认配置补齐表单未填写的参数。
- * - 数据库表不存在或未配置时，兼容旧 sysconf 配置作为兜底。
+ * - 保存和读取平台 Cookie 配置池中的 Cookie、UA、DID 和扩展参数
+ * - 支持抖音按 h5/web/live 分渠道配置，其他平台按 web/app/mini/default 扩展
+ * - 查询时用后台默认配置补齐表单未填写的参数
+ * - 数据库表不存在或未配置时，兼容旧 sysconf 配置作为兜底
  */
 class CookiesService
 {
@@ -52,7 +52,7 @@ class CookiesService
     }
 
     /**
-     * 读取后台保存的 Cookie 配置。
+     * 读取后台保存的 Cookie 配置
      *
      * @return array<string,mixed>
      */
@@ -70,9 +70,9 @@ class CookiesService
     }
 
     /**
-     * 按 ID 读取一条启用中的 Cookie 配置。
+     * 按 ID 读取一条启用中的 Cookie 配置
      *
-     * 传入平台时会同时校验平台，避免查询抖音时误用快手 Cookie。
+     * 传入平台时会同时校验平台，避免查询抖音时误用快手 Cookie
      *
      * @return array<string,mixed>
      */
@@ -102,7 +102,7 @@ class CookiesService
     }
 
     /**
-     * 归一化 Cookie 配置。
+     * 归一化 Cookie 配置
      *
      * @param array<string,mixed> $data
      * @return array<string,mixed>
@@ -139,7 +139,7 @@ class CookiesService
     }
 
     /**
-     * 保存某个平台的默认请求配置。
+     * 保存某个平台的默认请求配置
      *
      * @param array<string,mixed> $data
      * @return array<string,mixed>
@@ -179,9 +179,9 @@ class CookiesService
     }
 
     /**
-     * 查询时合并表单参数和后台默认配置。
+     * 查询时合并表单参数和后台默认配置
      *
-     * 表单里填了就用表单值；表单为空时，用后台配置兜底。
+     * 表单里填了就用表单值；表单为空时，用后台配置兜底
      *
      * @param array<string,mixed> $data
      * @param array<string,mixed>|null $defaults
@@ -227,7 +227,7 @@ class CookiesService
     }
 
     /**
-     * 标记 Cookie 配置的使用结果。
+     * 标记 Cookie 配置的使用结果
      */
     public static function markResult(int $id, bool $success, string $error = ''): void
     {
@@ -254,7 +254,7 @@ class CookiesService
     }
 
     /**
-     * 将扩展参数 JSON 转成数组。
+     * 将扩展参数 JSON 转成数组
      *
      * @return array<string,mixed>
      */
@@ -274,7 +274,7 @@ class CookiesService
     }
 
     /**
-     * 校验扩展参数是否为 JSON 对象。
+     * 校验扩展参数是否为 JSON 对象
      */
     public static function assertValidParams(string $params): void
     {

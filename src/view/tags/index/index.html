@@ -1,0 +1,106 @@
+{extend name="table"}
+
+{block name="button"}
+<!--{if auth("add")}-->
+<button data-modal='{:url("add")}' data-title="{:lang('添加标签')}" class='layui-btn layui-btn-sm layui-btn-primary'>{:lang('添加标签')}</button>
+<!--{/if}-->
+<!--{if auth("remove")}-->
+<a data-confirm="{:lang('确定要删除这些标签吗？')}" data-table-id="WeightTagsTable" data-action='{:url("remove")}' data-rule="id#{id}" class='layui-btn layui-btn-sm layui-btn-danger'>{:lang('批量删除')}</a>
+<!--{/if}-->
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='tags/index/index_search'}
+    <table id="WeightTagsTable" data-url="{:sysuri('index')}" data-target-search="form.form-search"></table>
+</div>
+
+<label class="layui-hide"><textarea id="StatusesData">{:json_encode($statuses, JSON_UNESCAPED_UNICODE)}</textarea></label>
+
+<script src="/static/plugs/iconify-picker/picker.js"></script>
+
+<script type="text/html" id="IconTpl">
+    {{# var _parsed = (window.qzParseIconClass || function(){return ''})(d.icon); }}
+    {{# if (_parsed) { }}
+    <iconify-icon icon="{{_parsed}}" title="{{d.icon}}" style="font-size:16px;color:#1e293b;vertical-align:middle"></iconify-icon>
+    {{# } else { }}<span style="color:#cbd5e1">-</span>{{# } }}
+</script>
+
+<script type="text/html" id="KeywordTpl">
+    <div>{{$.limitText(d.value, 72)}}</div>
+    <div class="font-s12 color-desc">{{$.keywordCount(d.value)}} {:lang('个关键词')}</div>
+</script>
+
+<script type="text/html" id="StatusSwitchTpl">
+    <!--{if auth("state")}-->
+    <input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="{:lang('启用')}|{:lang('禁用')}" lay-filter="StatusSwitch" {{-d.status>0?'checked':''}}>
+    <!--{else}-->
+    {{- $.statusLabel(d.status) }}
+    <!--{/if}-->
+</script>
+
+<script type="text/html" id="SortInputTpl">
+    <input type="number" min="0" data-blur-number="0" data-action-blur="{:sysuri()}" data-value="id#{{d.id}};action#sort;sort#{value}" data-loading="false" value="{{d.sort || 0}}" class="layui-input text-center">
+</script>
+
+<script type="text/html" id="toolbar">
+    <!--{if auth("edit")}-->
+    <a class="layui-btn layui-btn-sm" data-title="{:lang('编辑标签')}" data-modal='{:url("edit")}?id={{d.id}}'>{:lang('编 辑')}</a>
+    <!--{/if}-->
+    <!--{if auth("remove")}-->
+    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="{:lang('确定要删除该标签吗？')}" data-action="{:url('remove')}" data-value="id#{{d.id}}">{:lang('删 除')}</a>
+    <!--{/if}-->
+</script>
+
+<script>
+    $.weightTagStatuses = JSON.parse($('#StatusesData').text());
+
+    $.statusLabel = function (key) {
+        var item = $.weightTagStatuses[key];
+        if (!item) return key || '-';
+        return '<span class="layui-badge ' + item.class + '">' + item.label + '</span>';
+    };
+
+    $.limitText = function (value, limit) {
+        value = value || '';
+        if (!value) return '-';
+        return value.length > limit ? value.substring(0, limit) + '...' : value;
+    };
+
+    $.keywordCount = function (value) {
+        value = value || '';
+        if (!value) return 0;
+        return value.split(',').filter(function (item) {
+            return item.trim() !== '';
+        }).length;
+    };
+
+    $(function () {
+        if (window.qzIconifyEnsureAll) window.qzIconifyEnsureAll();
+        $('#WeightTagsTable').layTable({
+            even: true, height: 'full',
+            sort: {field: 'sort', type: 'desc'},
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'sort', title: '{:lang("排序")}', width: 90, align: 'center', templet: '#SortInputTpl'},
+                {field: 'title', title: '{:lang("标签")}', width: 140},
+                {field: 'icon', title: 'Icon', width: 80, align: 'center', templet: '#IconTpl'},
+                {field: 'value', title: '{:lang("关键词")}', minWidth: 320, templet: '#KeywordTpl'},
+                {field: 'create_at', title: '{:lang("创建时间")}', width: 165, align: 'center'},
+                {field: 'status', title: '{:lang("状态")}', width: 100, align: 'center', templet: '#StatusSwitchTpl'},
+                {toolbar: '#toolbar', title: '{:lang("操作面板")}', width: 150, align: 'left', fixed: 'right'}
+            ]]
+        });
+
+        layui.form.on('switch(StatusSwitch)', function (obj) {
+            var data = {id: obj.value, status: obj.elem.checked > 0 ? 1 : 0};
+            $.form.load("{:url('state')}", data, 'post', function (ret) {
+                if (ret.code < 1) $.msg.error(ret.info, 3, function () {
+                    $('#WeightTagsTable').trigger('reload');
+                }); else $('#WeightTagsTable').trigger('reload');
+                return false;
+            }, false);
+        });
+    });
+</script>
+{/block}

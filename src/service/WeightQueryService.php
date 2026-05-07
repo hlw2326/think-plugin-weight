@@ -10,7 +10,7 @@ use plugin\weight\model\WeightQueryLog;
 use Throwable;
 
 /**
- * 查询平台账号数据并写入记录。
+ * 查询平台账号数据并写入记录
  */
 class WeightQueryService
 {
@@ -48,7 +48,7 @@ class WeightQueryService
             $feedList = is_array($payload['feed_list'] ?? null) ? $payload['feed_list'] : [];
             $userInfo = is_array($payload['user_info'] ?? null) ? $payload['user_info'] : [];
             $userInfo = self::completeUserInfo($userInfo, $feedList, $platform);
-            $analysis = WeightScoreService::analyze($userInfo, $feedList);
+            $analysis = ScoreService::analyze($userInfo, $feedList);
             $cookiesConfig = self::cookiesConfig($data);
 
             $logId = self::saveLog([
@@ -218,7 +218,7 @@ class WeightQueryService
     }
 
     /**
-     * 返回本次查询实际使用的 Cookie 配置，方便前端展示和原始结果追踪。
+     * 返回本次查询实际使用的 Cookie 配置，方便前端展示和原始结果追踪
      *
      * @param array<string,mixed> $data
      * @return array<string,mixed>
@@ -242,7 +242,7 @@ class WeightQueryService
     }
 
     /**
-     * 用户信息接口偶尔会返回空数据，作品列表里的 author 可作为基础账号资料兜底。
+     * 用户信息接口偶尔会返回空数据，作品列表里的 author 可作为基础账号资料兜底
      *
      * @param array<string,mixed> $userInfo
      * @param array<int,array<string,mixed>> $feedList
@@ -340,10 +340,10 @@ class WeightQueryService
     }
 
     /**
-     * 将查询原始结果统一整理成前端可解析的 JSON 字符串。
+     * 将查询原始结果统一整理成前端可解析的 JSON 字符串
      *
      * 新记录会直接保存标准 JSON；旧记录如果曾经被截断或写入了普通文本，
-     * 这里会兜底包成 JSON 对象，避免详情页解析失败。
+     * 这里会兜底包成 JSON 对象，避免详情页解析失败
      */
     public static function formatRawResult(string $json): string
     {

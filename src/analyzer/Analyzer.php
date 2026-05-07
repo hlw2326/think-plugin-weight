@@ -101,6 +101,18 @@ class Analyzer
             new Weight($score, $grade, $baseFieldDetails, $pool->value()),
         ];
         $fieldDetails = self::fieldDetails($fields);
+        $page = self::pagePayload(
+            $userInfo,
+            $fanCount,
+            $followCount,
+            $workCount,
+            $likeCount,
+            $collectCount,
+            $workMetrics,
+            $score,
+            $grade,
+            $fieldDetails
+        );
 
         return [
             'score' => $score,
@@ -109,6 +121,7 @@ class Analyzer
             'fields' => $fieldDetails,
             'suggestions' => self::suggestions($fields),
             'risk_messages' => self::messagesByLevel($fields, 'risk'),
+            'page' => $page,
             'platform' => (string) ($userInfo['platform'] ?? ''),
             'type' => (string) ($userInfo['type'] ?? ''),
             'user_id' => (string) ($userInfo['user_id'] ?? ''),
@@ -167,6 +180,224 @@ class Analyzer
             $details[$field->key()] = $field->toArray();
         }
         return $details;
+    }
+
+    /**
+     * 组装小程序 dy/weight 页面可直接使用的数据。
+     *
+     * page 下保持单词 key，避免前端同时维护后台字段名和页面变量名。
+     *
+     * @param array<string,mixed> $userInfo
+     * @param array<string,mixed> $workMetrics
+     * @param array<string,array<string,mixed>> $fields
+     * @return array<string,mixed>
+     */
+    private static function pagePayload(
+        array $userInfo,
+        int $fanCount,
+        int $followCount,
+        int $workCount,
+        int $likeCount,
+        int $collectCount,
+        array $workMetrics,
+        int $score,
+        string $grade,
+        array $fields
+    ): array {
+        $pool = is_array($fields['pool']['value'] ?? null) ? $fields['pool']['value'] : [];
+        $tags = is_array($fields['account_tags']['value'] ?? null) ? $fields['account_tags']['value'] : [];
+
+        return [
+            'user' => self::pageUser($userInfo, $fanCount, $followCount, $workCount, $likeCount, $tags),
+            'analysis' => self::pageAnalysis($score, $grade, $workCount, $workMetrics, $tags),
+            'advice' => self::pageAdvice($fields),
+            'traffic' => self::pageTraffic($pool, $workMetrics),
+            'valuation' => self::pageValuation($userInfo, $fanCount, $workCount, $likeCount, $collectCount, $workMetrics, $score),
+        ];
+    }
+
+    /**
+     * @param array<string,mixed> $userInfo
+     * @param array<string,mixed> $tags
+     * @return array<string,mixed>
+     */
+    private static function pageUser(
+        array $userInfo,
+        int $fanCount,
+        int $followCount,
+        int $workCount,
+        int $likeCount,
+        array $tags
+    ): array {
+        $name = trim((string) ($userInfo['nickname'] ?? ''));
+        $userId = self::firstFilledString(
+            $userInfo['display_id'] ?? '',
+            $userInfo['user_id'] ?? '',
+            $userInfo['sec_user_id'] ?? ''
+        );
+
+        return [
+            'avatar' => self::avatarUrl($userInfo, $name ?: $userId),
+            'name' => $name !== '' ? $name : '未命名账号',
+            'userId' => $userId,
+            'isVerified' => !empty($userInfo['verified']),
+            'tags' => self::pageTags($tags),
+            'stats' => [
+                ['value' => self::formatCount($followCount), 'label' => '关注'],
+                ['value' => self::formatCount($fanCount), 'label' => '粉丝'],
+                ['value' => self::formatCount($likeCount), 'label' => '点赞'],
+                ['value' => self::formatCount($workCount), 'label' => '作品'],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string,mixed> $tags
+     * @return array<int,array<string,string>>
+     */
+    private static function pageTags(array $tags): array
+    {
+        $topTags = is_array($tags['top_tags'] ?? null) ? array_slice($tags['top_tags'], 0, 2) : [];
+        $classes = [
+            'bg-rose-50 text-rose-600 border-rose-100',
+            'bg-indigo-50 text-indigo-600 border-indigo-100',
+        ];
+
+        $items = [];
+        foreach ($topTags as $index => $tag) {
+            $tagName = trim((string) (is_array($tag) ? ($tag['tag_name'] ?? '') : ''));
+            if ($tagName === '') {
+                continue;
+            }
+
+            $items[] = [
+                'text' => $tagName,
+                'icon' => self::tagIcon($tagName),
+                'class' => $classes[$index] ?? $classes[0],
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param array<string,mixed> $workMetrics
+     * @param array<string,mixed> $tags
+     * @return array<string,mixed>
+     */
+    private static function pageAnalysis(int $score, string $grade, int $workCount, array $workMetrics, array $tags): array
+    {
+        $activity = self::activityScore($workCount, (int) $workMetrics['sample_feed_count']);
+        $verticality = self::verticalityScore($tags);
+        $content = self::contentScore($workMetrics);
+        $interaction = self::interactionMetricScore((float) $workMetrics['interaction_rate']);
+
+        return [
+            'score' => $score,
+            'grade' => $grade,
+            'currentLevel' => self::scoreLevel($score),
+            'isUpgrading' => false,
+            'status' => self::statusText($score),
+            'metrics' => [
+                self::pageMetric('活跃度', $activity, 'bg-blue-500'),
+                self::pageMetric('垂直度', $verticality, 'bg-amber-500'),
+                self::pageMetric('内容力', $content, 'bg-green-500'),
+                self::pageMetric('互动率', $interaction, 'bg-red-400'),
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string,array<string,mixed>> $fields
+     * @return array<int,array<string,mixed>>
+     */
+    private static function pageAdvice(array $fields): array
+    {
+        $items = [];
+        foreach ($fields as $field) {
+            foreach (is_array($field['tips'] ?? null) ? $field['tips'] : [] as $tip) {
+                $tip = trim((string) $tip);
+                if ($tip === '' || !self::isWeakMessage($tip)) {
+                    continue;
+                }
+
+                $items[] = self::adviceItem($field, $tip);
+            }
+        }
+
+        if ($items !== []) {
+            return array_slice($items, 0, 8);
+        }
+
+        return [[
+            'id' => 'stable',
+            'title' => '账号状态稳定',
+            'tag' => '表现正常',
+            'desc' => '账号基础信息和近期作品表现较稳定，建议保持更新节奏并持续优化内容互动。',
+            'icon' => 'i-fa6-solid-circle-check',
+            'iconBg' => 'bg-green-100 text-green-600',
+            'tagClass' => 'text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100',
+        ]];
+    }
+
+    /**
+     * @param array<string,mixed> $pool
+     * @param array<string,mixed> $workMetrics
+     * @return array<string,mixed>
+     */
+    private static function pageTraffic(array $pool, array $workMetrics): array
+    {
+        $poolKey = (string) ($pool['pool_key'] ?? 'cold_start');
+        $level = self::poolLevel($poolKey);
+        $nextRequirement = self::nextRequirement($workMetrics, $level);
+
+        return [
+            'level' => $level,
+            'maxLevel' => 8,
+            'playRange' => self::playRange($poolKey),
+            'nextRequirement' => $nextRequirement,
+            'progress' => max(0, min(100, (int) ($pool['pool_score'] ?? 0))),
+            'advice' => self::trafficAdvice($poolKey, $nextRequirement),
+        ];
+    }
+
+    /**
+     * @param array<string,mixed> $userInfo
+     * @param array<string,mixed> $workMetrics
+     * @return array<string,mixed>
+     */
+    private static function pageValuation(
+        array $userInfo,
+        int $fanCount,
+        int $workCount,
+        int $likeCount,
+        int $collectCount,
+        array $workMetrics,
+        int $score
+    ): array {
+        $estimate = (int) round(
+            $fanCount * 1.15
+            + (int) $workMetrics['avg_play_count'] * 2.2
+            + (int) $workMetrics['avg_like_count'] * 32
+            + (int) $workMetrics['avg_collect_count'] * 45
+            + $workCount * 60
+            + $score * 720
+            + min(50000, $likeCount * 0.04)
+            + min(30000, $collectCount * 0.06)
+        );
+
+        $seed = crc32(self::firstFilledString(
+            $userInfo['display_id'] ?? '',
+            $userInfo['user_id'] ?? '',
+            $userInfo['nickname'] ?? '',
+            (string) $fanCount
+        ));
+        $queryCount = 800 + ($seed % 3200);
+
+        return [
+            'value' => number_format(max(0, $estimate)),
+            'queryCount' => number_format($queryCount),
+        ];
     }
 
     /**
@@ -302,6 +533,271 @@ class Analyzer
         if ($rate >= 1.0) return 4;
         if ($rate > 0.2) return 2;
         return 0;
+    }
+
+    private static function firstFilledString(mixed ...$values): string
+    {
+        foreach ($values as $value) {
+            $value = trim((string) $value);
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * @param array<string,mixed> $userInfo
+     */
+    private static function avatarUrl(array $userInfo, string $seed): string
+    {
+        $avatarUrl = trim((string) ($userInfo['avatar_url'] ?? ''));
+        if ($avatarUrl !== '') {
+            return $avatarUrl;
+        }
+
+        $seed = $seed !== '' ? $seed : 'weight';
+        return 'https://api.dicebear.com/9.x/avataaars/svg?seed=' . rawurlencode($seed);
+    }
+
+    private static function formatCount(int $value): string
+    {
+        $value = max(0, $value);
+        if ($value >= 100000000) {
+            return rtrim(rtrim(number_format($value / 100000000, 1), '0'), '.') . '亿';
+        }
+        if ($value >= 10000) {
+            return rtrim(rtrim(number_format($value / 10000, 1), '0'), '.') . 'w';
+        }
+
+        return (string) $value;
+    }
+
+    private static function tagIcon(string $tagName): string
+    {
+        foreach ([
+            '美食' => 'i-fa6-solid-bowl-food',
+            '萌宠' => 'i-fa6-solid-paw',
+            '宠物' => 'i-fa6-solid-paw',
+            '音乐' => 'i-fa6-solid-music',
+            '舞蹈' => 'i-fa6-solid-person-running',
+            '旅游' => 'i-fa6-solid-location-dot',
+            '旅行' => 'i-fa6-solid-location-dot',
+            '汽车' => 'i-fa6-solid-car',
+            '教育' => 'i-fa6-solid-graduation-cap',
+            '财经' => 'i-fa6-solid-chart-line',
+            '科技' => 'i-fa6-solid-microchip',
+            '游戏' => 'i-fa6-solid-gamepad',
+            '影视' => 'i-fa6-solid-film',
+            '母婴' => 'i-fa6-solid-baby',
+            '健身' => 'i-fa6-solid-dumbbell',
+            '穿搭' => 'i-fa6-solid-shirt',
+            '剧情' => 'i-fa6-solid-masks-theater',
+            '搞笑' => 'i-fa6-solid-face-laugh-squint',
+        ] as $keyword => $icon) {
+            if (str_contains($tagName, $keyword)) {
+                return $icon;
+            }
+        }
+
+        return 'i-fa6-solid-hashtag';
+    }
+
+    private static function activityScore(int $workCount, int $sampleFeedCount): int
+    {
+        return max(0, min(100, (int) round(
+            min(60.0, $workCount / 120 * 60)
+            + min(40.0, $sampleFeedCount / 18 * 40)
+        )));
+    }
+
+    /**
+     * @param array<string,mixed> $tags
+     */
+    private static function verticalityScore(array $tags): int
+    {
+        $coverage = (float) ($tags['coverage_rate'] ?? 0);
+        $concentration = (float) ($tags['concentration_rate'] ?? 0);
+
+        return max(0, min(100, (int) round($coverage * 0.45 + $concentration * 0.55)));
+    }
+
+    /**
+     * @param array<string,mixed> $workMetrics
+     */
+    private static function contentScore(array $workMetrics): int
+    {
+        $score = self::logScore((int) $workMetrics['avg_play_count'], 40, 8.0)
+            + self::logScore((int) $workMetrics['avg_like_count'], 30, 7.5)
+            + self::logScore((int) $workMetrics['avg_collect_count'], 15, 5.5)
+            + self::logScore((int) $workMetrics['avg_share_count'], 15, 5.5);
+
+        return max(0, min(100, $score));
+    }
+
+    private static function interactionMetricScore(float $rate): int
+    {
+        if ($rate >= 3.0) return 95;
+        if ($rate >= 1.0) return 78;
+        if ($rate > 0.2) return 52;
+        if ($rate > 0.0) return 28;
+        return 0;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private static function pageMetric(string $label, int $score, string $color): array
+    {
+        $score = max(0, min(100, $score));
+        if ($score < 40) {
+            $color = 'bg-red-400';
+        } elseif ($score < 70) {
+            $color = 'bg-amber-500';
+        }
+
+        return [
+            'label' => $label,
+            'value' => self::metricLabel($score),
+            'color' => $color,
+            'width' => $score . '%',
+        ];
+    }
+
+    private static function metricLabel(int $score): string
+    {
+        if ($score >= 85) return '极高';
+        if ($score >= 70) return '良好';
+        if ($score >= 40) return '中等';
+        return '偏低';
+    }
+
+    private static function statusText(int $score): string
+    {
+        if ($score >= 85) return '账号状态极佳，各项核心指标运行平稳';
+        if ($score >= 70) return '账号状态良好，具备继续放大的基础';
+        if ($score >= 55) return '账号处于成长阶段，建议重点优化内容互动';
+        if ($score >= 40) return '账号基础较弱，需要补齐资料和作品表现';
+        return '账号存在明显短板，建议先完成基础养号和内容定位';
+    }
+
+    private static function scoreLevel(int $score): int
+    {
+        return max(0, min(9, (int) floor($score / 10)));
+    }
+
+    /**
+     * @param array<string,mixed> $field
+     * @return array<string,mixed>
+     */
+    private static function adviceItem(array $field, string $tip): array
+    {
+        $severity = self::adviceSeverity($tip);
+
+        return [
+            'id' => (string) ($field['key'] ?? md5($tip)),
+            'title' => trim((string) ($field['label'] ?? '账号指标')) . '待优化',
+            'tag' => $severity['tag'],
+            'desc' => $tip,
+            'icon' => self::adviceIcon((string) ($field['key'] ?? ''), $tip),
+            'iconBg' => $severity['iconBg'],
+            'tagClass' => $severity['tagClass'],
+        ];
+    }
+
+    /**
+     * @return array{tag:string,iconBg:string,tagClass:string}
+     */
+    private static function adviceSeverity(string $tip): array
+    {
+        foreach (['违规', '手机号', '隐私', '封号', '无法判断'] as $keyword) {
+            if (str_contains($tip, $keyword)) {
+                return [
+                    'tag' => '高风险',
+                    'iconBg' => 'bg-red-100 text-red-600',
+                    'tagClass' => 'text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100',
+                ];
+            }
+        }
+
+        foreach (['为空', '偏低', '偏弱', '不足', '过少', '未认证'] as $keyword) {
+            if (str_contains($tip, $keyword)) {
+                return [
+                    'tag' => '需优化',
+                    'iconBg' => 'bg-amber-100 text-amber-600',
+                    'tagClass' => 'text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100',
+                ];
+            }
+        }
+
+        return [
+            'tag' => '建议',
+            'iconBg' => 'bg-blue-100 text-blue-600',
+            'tagClass' => 'text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100',
+        ];
+    }
+
+    private static function adviceIcon(string $fieldKey, string $tip): string
+    {
+        if (str_contains($tip, '违规') || str_contains($tip, '手机号')) {
+            return 'i-fa6-solid-triangle-exclamation';
+        }
+
+        return match ($fieldKey) {
+            'nickname' => 'i-fa6-solid-id-card',
+            'signature' => 'i-fa6-solid-pen-to-square',
+            'fan_count', 'follow_count' => 'i-fa6-solid-users',
+            'work', 'work_count' => 'i-fa6-solid-chart-line',
+            'verified' => 'i-fa6-solid-circle-check',
+            'account_tags' => 'i-fa6-solid-tags',
+            'pool' => 'i-fa6-solid-water',
+            default => 'i-fa6-solid-circle-info',
+        };
+    }
+
+    private static function poolLevel(string $poolKey): int
+    {
+        return match ($poolKey) {
+            'premium' => 8,
+            'stable' => 6,
+            'growth' => 4,
+            'basic' => 2,
+            default => 1,
+        };
+    }
+
+    /**
+     * @param array<string,mixed> $workMetrics
+     */
+    private static function nextRequirement(array $workMetrics, int $level): string
+    {
+        if ((int) $workMetrics['avg_play_count'] < 1000) return '平均播放 > 1,000';
+        if ((float) $workMetrics['interaction_rate'] <= 0.2) return '互动率 > 0.2%';
+        if ((int) $workMetrics['avg_comment_count'] < 10) return '平均评论 > 10';
+        if ((int) $workMetrics['avg_collect_count'] < 5) return '平均收藏 > 5';
+        if ($level >= 8) return '保持稳定更新';
+        return '完播与互动继续提升';
+    }
+
+    private static function playRange(string $poolKey): string
+    {
+        return match ($poolKey) {
+            'premium' => '20,000+',
+            'stable' => '5,000 ~ 20,000',
+            'growth' => '2,000 ~ 5,000',
+            'basic' => '500 ~ 2,000',
+            default => '0 ~ 500',
+        };
+    }
+
+    private static function trafficAdvice(string $poolKey, string $nextRequirement): string
+    {
+        if ($poolKey === 'premium') {
+            return '账号已接近高权重流量池，建议保持更新节奏，继续放大高互动作品选题。';
+        }
+
+        return "当前账号仍有晋级空间，建议围绕「{$nextRequirement}」优化近期作品，提升进入更高流量池的概率。";
     }
 
     private static function isWeakMessage(string $message): bool

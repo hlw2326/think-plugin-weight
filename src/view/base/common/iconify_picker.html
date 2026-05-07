@@ -1,0 +1,31 @@
+<!--
+  iconify 图标选择器 - 可复用组件
+
+  表单字段固定为 icon，保存 UnoCSS class 格式，例如 i-fa6-solid-tag
+-->
+<label class="block relative layui-form-item iconify-picker-root"
+    data-i18n-choose="{:lang('选择图标')}"
+    data-i18n-search="{:lang('搜索图标名，如 tag')}"
+    data-i18n-empty="{:lang('没有匹配的图标')}"
+    data-i18n-loading="{:lang('加载中...')}"
+    data-i18n-load-failed="{:lang('加载失败，请检查静态资源路径')}">
+    <span class="help-label"><b>{:lang('图标')}</b>Icon</span>
+    <div class="flex" style="gap:10px;align-items:center">
+        <div class="flex-1" style="margin:0">
+            <input name="icon" value='{$vo.icon|default="i-fa6-solid-tag"}'
+                placeholder="{:lang('如 i-fa6-solid-tag；或点右侧按钮选择')}"
+                class="layui-input iconify-picker-input">
+        </div>
+        <span class="layui-btn layui-btn-primary" style="padding:0 14px;min-width:45px;margin:0">
+            <iconify-icon class="iconify-picker-preview" icon=""
+                style="font-size:1.2em;margin:0;float:none;vertical-align:middle"></iconify-icon>
+        </span>
+        <button type="button" class="layui-btn layui-btn-primary iconify-picker-trigger" style="margin:0">
+            {:lang('选择图标')}
+        </button>
+    </div>
+    <span class="help-block">{:lang('支持 fa6-solid / fa6-brands / ri 三个集合；类名格式 i-&lt;集合&gt;-&lt;图标名&gt;。')}</span>
+</label>
+
+<link rel="stylesheet" href="/static/plugs/iconify-picker/picker.css">
+<script src="/static/plugs/iconify-picker/picker.js"></script>

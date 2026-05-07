@@ -13,7 +13,7 @@ use think\admin\helper\QueryHelper;
 use Throwable;
 
 /**
- * 账号权重查询记录。
+ * 账号权重查询记录
  *
  * @class Log
  * @package plugin\weight\controller\query
@@ -21,7 +21,7 @@ use Throwable;
 class Log extends Controller
 {
     /**
-     * 查询记录列表。
+     * 查询记录列表
      *
      * @auth true
      * @menu true
@@ -42,7 +42,7 @@ class Log extends Controller
     }
 
     /**
-     * 发起新的账号查询。
+     * 发起新的账号查询
      *
      * @auth true
      */
@@ -91,7 +91,7 @@ class Log extends Controller
     }
 
     /**
-     * 查看查询详情。
+     * 查看查询详情
      *
      * @auth true
      */
@@ -113,7 +113,7 @@ class Log extends Controller
     }
 
     /**
-     * 清理旧查询记录。
+     * 清理旧查询记录
      *
      * @auth true
      */
@@ -133,7 +133,7 @@ class Log extends Controller
     }
 
     /**
-     * 删除勾选的查询记录。
+     * 删除勾选的查询记录
      *
      * @auth true
      */
@@ -143,9 +143,9 @@ class Log extends Controller
     }
 
     /**
-     * 查询弹窗可选的 Cookie 配置。
+     * 查询弹窗可选的 Cookie 配置
      *
-     * 只下发展示所需字段，不把 Cookie、UA、DID 直接输出到页面。
+     * 只下发展示所需字段，不把 Cookie、UA、DID 直接输出到页面
      *
      * @return array<int,array<string,mixed>>
      */
@@ -191,7 +191,7 @@ class Log extends Controller
     }
 
     /**
-     * 查询完成后给弹窗返回可读结果。
+     * 查询完成后给弹窗返回可读结果
      *
      * @param array<string,mixed> $result
      */

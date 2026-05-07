@@ -7,7 +7,7 @@ namespace plugin\weight\controller;
 use think\admin\Controller;
 
 /**
- * 默认模块入口。
+ * 默认模块入口
  *
  * @class Main
  * @package plugin\weight\controller
@@ -15,7 +15,7 @@ use think\admin\Controller;
 class Main extends Controller
 {
     /**
-     * 数据概览。
+     * 数据概览
      *
      * @auth true
      * @menu true

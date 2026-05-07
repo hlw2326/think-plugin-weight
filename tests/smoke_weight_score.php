@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use plugin\weight\service\WeightScoreService;
+use plugin\weight\service\ScoreService;
 
-$analysis = WeightScoreService::analyze([
+$analysis = ScoreService::analyze([
     'platform' => 'dy',
     'nickname' => 'demo',
     'total' => [
@@ -72,6 +72,39 @@ if (($analysis['fields']['score']['value']['score'] ?? 0) !== $analysis['score']
 
 if (($analysis['fields']['weight']['value']['grade'] ?? '') !== $analysis['grade']) {
     throw new RuntimeException('期望评分服务输出账号权重结论');
+}
+
+$page = $analysis['page'] ?? null;
+if (!is_array($page)) {
+    throw new RuntimeException('期望评分服务输出小程序页面数据');
+}
+
+foreach (['user', 'analysis', 'advice', 'traffic', 'valuation'] as $key) {
+    if (!array_key_exists($key, $page)) {
+        throw new RuntimeException("期望 page 输出单词字段 {$key}");
+    }
+}
+
+foreach (['userInfo', 'analysisData', 'adviceList', 'trafficData', 'valuationData'] as $key) {
+    if (array_key_exists($key, $page)) {
+        throw new RuntimeException("page 不应输出多单词字段 {$key}");
+    }
+}
+
+if (($page['user']['name'] ?? '') !== 'demo' || count($page['user']['stats'] ?? []) !== 4) {
+    throw new RuntimeException('期望 page.user 对齐小程序用户卡片');
+}
+
+if (($page['analysis']['score'] ?? 0) !== $analysis['score'] || count($page['analysis']['metrics'] ?? []) !== 4) {
+    throw new RuntimeException('期望 page.analysis 对齐小程序综合评估卡片');
+}
+
+if (($page['traffic']['maxLevel'] ?? 0) !== 8 || !isset($page['traffic']['playRange'])) {
+    throw new RuntimeException('期望 page.traffic 对齐小程序流量池卡片');
+}
+
+if (!isset($page['valuation']['value'], $page['valuation']['queryCount'])) {
+    throw new RuntimeException('期望 page.valuation 对齐小程序估值卡片');
 }
 
 foreach ($analysis['fields'] as $field) {

@@ -1,0 +1,29 @@
+<form action="{:sysuri()}" method="post" data-auto="true" class="layui-form layui-card">
+    <div class="layui-card-body padding-left-40">
+
+        <label class="layui-form-item relative block label-required-prev">
+            <span class="help-label"><b>{:lang('标签名称')}</b>Title</span>
+            <input name="title" value='{$vo.title|default=""}' required maxlength="80"
+                placeholder="{:lang('如：美食')}" class="layui-input">
+        </label>
+
+        {include file="base/common/iconify_picker"}
+
+        <div class="layui-form-item label-required-prev">
+            <span class="help-label"><b>{:lang('关键词')}</b>Keywords</span>
+            <textarea name="value" required class="layui-textarea" style="min-height:160px"
+                placeholder="{:lang('关键词用逗号或换行分隔，如：美食,探店,餐厅,烘焙')}">{$vo.value|default=''}</textarea>
+            <span class="help-block">{:lang('系统会自动去空、去重，并统一保存为英文逗号分隔。')}</span>
+        </div>
+
+    </div>
+
+    <div class="hr-line-dashed"></div>
+
+    {notempty name='vo.id'}<input type="hidden" value="{$vo.id}" name="id">{/notempty}
+
+    <div class="layui-form-item text-center">
+        <button class="layui-btn" type="submit" lay-submit>{:lang('保存标签')}</button>
+        <button class="layui-btn layui-btn-danger" type="button" data-close>{:lang('取消操作')}</button>
+    </div>
+</form>

@@ -25,7 +25,7 @@ think-plugin-weight/
     │   └── WeightQueryLog.php
     ├── service/
     │   ├── WeightQueryService.php
-    │   └── WeightScoreService.php
+    │   └── ScoreService.php
     ├── lang/
     │   └── en-us.php
     └── view/

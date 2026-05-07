@@ -11,17 +11,17 @@ use think\admin\helper\QueryHelper;
 use Throwable;
 
 /**
- * 平台 Cookie 配置池。
+ * 平台 Cookie 配置池
  *
  * 作用：
- * - 管理抖音、快手、小红书等平台请求账号信息时使用的 Cookie、UA、DID。
- * - 抖音可按 h5、web、live 分开保存配置。
- * - params 用于保存平台扩展参数 JSON，例如 headers、params、msToken、a_bogus。
+ * - 管理抖音、快手、小红书等平台请求账号信息时使用的 Cookie、UA、DID
+ * - 抖音可按 h5、web、live 分开保存配置
+ * - params 用于保存平台扩展参数 JSON，例如 headers、params、msToken、a_bogus
  */
 class Index extends Controller
 {
     /**
-     * Cookie 配置列表。
+     * 凭证列表
      *
      * @auth true
      * @menu true
@@ -29,7 +29,7 @@ class Index extends Controller
     public function index(): void
     {
         WeightCookies::mQuery()->layTable(function () {
-            $this->title = 'Cookie配置池';
+            $this->title = '凭证列表';
             $this->current = 'cookies';
             $this->platforms = CookiesService::platforms();
             $this->channels = CookiesService::channels();
@@ -42,7 +42,7 @@ class Index extends Controller
     }
 
     /**
-     * 添加 Cookie 配置。
+     * 添加凭证
      *
      * @auth true
      */
@@ -52,7 +52,7 @@ class Index extends Controller
     }
 
     /**
-     * 编辑 Cookie 配置。
+     * 添加凭证
      *
      * @auth true
      */
@@ -62,7 +62,7 @@ class Index extends Controller
     }
 
     /**
-     * 表单数据处理。
+     * 表单凭证
      *
      * @param array<string,mixed> $data
      */
@@ -111,7 +111,7 @@ class Index extends Controller
     }
 
     /**
-     * 修改状态。
+     * 修改状态
      *
      * @auth true
      */
@@ -124,7 +124,7 @@ class Index extends Controller
     }
 
     /**
-     * 设置平台默认 Cookie 配置。
+     * 设置平台配置
      *
      * @auth true
      */
@@ -146,7 +146,7 @@ class Index extends Controller
     }
 
     /**
-     * 删除 Cookie 配置。
+     * 删除凭证
      *
      * @auth true
      */

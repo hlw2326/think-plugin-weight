@@ -7,12 +7,12 @@ namespace plugin\weight\model;
 use think\admin\Model;
 
 /**
- * 平台请求配置池。
+ * 平台请求配置池
  *
  * 作用：
- * - 保存抖音、快手、小红书等平台的 Cookie、UA、DID 和扩展参数。
- * - 支持同一平台按不同渠道配置，例如抖音 h5/web/live。
- * - 查询账号权重时，服务层会从这里取可用配置补齐请求参数。
+ * - 保存抖音、快手、小红书等平台的 Cookie、UA、DID 和扩展参数
+ * - 支持同一平台按不同渠道配置，例如抖音 h5/web/live
+ * - 查询账号权重时，服务层会从这里取可用配置补齐请求参数
  *
  * @property int $id
  * @property string $name
@@ -45,7 +45,7 @@ class WeightCookies extends Model
     public const STATUS_ENABLED = 1;
 
     /**
-     * 平台枚举。
+     * 平台枚举
      *
      * @return array<string,array{label:string,class:string}>
      */
@@ -55,7 +55,7 @@ class WeightCookies extends Model
     }
 
     /**
-     * 渠道枚举。
+     * 渠道枚举
      *
      * @return array<string,array{label:string,class:string}>
      */
@@ -72,7 +72,7 @@ class WeightCookies extends Model
     }
 
     /**
-     * 状态枚举。
+     * 状态枚举
      *
      * @return array<int,array{label:string,class:string}>
      */

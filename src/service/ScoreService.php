@@ -7,9 +7,9 @@ namespace plugin\weight\service;
 use plugin\weight\analyzer\Analyzer;
 
 /**
- * 本地账号权重评分工具。
+ * 本地账号权重评分工具
  */
-class WeightScoreService
+class ScoreService
 {
     /**
      * @param array<string,mixed> $userInfo

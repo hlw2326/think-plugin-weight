@@ -7,7 +7,7 @@ namespace plugin\weight\model;
 use think\admin\Model;
 
 /**
- * 账号权重查询记录。
+ * 账号权重查询记录
  *
  * @property int $id
  * @property string $platform
